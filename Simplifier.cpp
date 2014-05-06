@@ -3,13 +3,13 @@
 #include "Simplifier.h"
 
 LineSet* indexView(QuadTree* tree, LineSet* prev, int &id){
-	Line line;
-	line.id = to_string(id);
-	line.points.push_back(Point(tree->range.maxX, tree->range.maxY));
-	line.points.push_back(Point(tree->range.maxX, tree->range.minY));
-	line.points.push_back(Point(tree->range.minX, tree->range.minY));
-	line.points.push_back(Point(tree->range.minX, tree->range.maxY));
-	line.points.push_back(Point(tree->range.maxX, tree->range.maxY));
+	Line* line = new Line;
+	line->id = to_string(id);
+	line->points.push_back(Point(tree->range.maxX, tree->range.maxY));
+	line->points.push_back(Point(tree->range.maxX, tree->range.minY));
+	line->points.push_back(Point(tree->range.minX, tree->range.minY));
+	line->points.push_back(Point(tree->range.minX, tree->range.maxY));
+	line->points.push_back(Point(tree->range.maxX, tree->range.maxY));
 	prev->lines.push_back(line);
 	if (tree->subTree[0] != NULL){
 		prev = indexView(tree->subTree[0], prev, ++id);
@@ -53,7 +53,25 @@ void Simplifier::wirteFile(string writeFile) {
 inline bool Simplifier::removeP(Triangle &triangle, int index){
 	if (!qTreePoint->hasPointInTri(&triangle)){
 		if (!qTreeLine->hasPointInTri(&triangle)){
-			--map->lines[triangle.p[index]->lineInd].kept;
+			if (map->lines[triangle.p[index]->lineInd]->kept == 3){
+				for (int i = 0; i < map->lines[triangle.p[index]->lineInd]->shareEnd11->size(); ++i){
+					for (int j = 0; j < map->lines[triangle.p[index]->lineInd]->shareEnd22->size(); ++j){
+						if (map->lines[triangle.p[index]->lineInd]->shareEnd11->at(i) ==
+							map->lines[triangle.p[index]->lineInd]->shareEnd22->at(j) &&
+							map->lines[map->lines[triangle.p[index]->lineInd]->shareEnd11->at(i)]->kept == 2)
+							return false;
+					}
+				}
+				for (int i = 0; i < map->lines[triangle.p[index]->lineInd]->shareEnd12->size(); ++i){
+					for (int j = 0; j < map->lines[triangle.p[index]->lineInd]->shareEnd21->size(); ++j){
+						if (map->lines[triangle.p[index]->lineInd]->shareEnd12->at(i) ==
+							map->lines[triangle.p[index]->lineInd]->shareEnd21->at(j) &&
+							map->lines[map->lines[triangle.p[index]->lineInd]->shareEnd12->at(i)]->kept == 2)
+							return false;
+					}
+				}
+			}
+			--map->lines[triangle.p[index]->lineInd]->kept;
 			triangle.p[index]->kept = false;
 			qTreeLine->remove(triangle.p[index]);
 			triangle.p[index] = triangle.p[(index + 2) % 3];
@@ -70,13 +88,13 @@ inline bool Simplifier::removeP(Triangle &triangle, int index){
 				toRm = constraint->at(i);
 				pre_ind = toRm->pointInd - 1;
 				next_ind = toRm->pointInd + 1;
-				while (map->lines[toRm->lineInd].points[pre_ind].kept != true)
+				while (map->lines[toRm->lineInd]->points[pre_ind].kept != true)
 					--pre_ind;
-				while (map->lines[toRm->lineInd].points[next_ind].kept != true)
+				while (map->lines[toRm->lineInd]->points[next_ind].kept != true)
 					++next_ind;
-				tri.p[0] = &map->lines[toRm->lineInd].points[pre_ind];
+				tri.p[0] = &map->lines[toRm->lineInd]->points[pre_ind];
 				tri.p[1] = toRm;
-				tri.p[2] = &map->lines[toRm->lineInd].points[next_ind];
+				tri.p[2] = &map->lines[toRm->lineInd]->points[next_ind];
 				if (!removeP(tri, 1)){
 					success = false;
 					break;
@@ -84,6 +102,25 @@ inline bool Simplifier::removeP(Triangle &triangle, int index){
 			}
 			delete constraint;
 			if (success){
+				if (map->lines[triangle.p[index]->lineInd]->kept == 3){
+					for (int i = 0; i < map->lines[triangle.p[index]->lineInd]->shareEnd11->size(); ++i){
+						for (int j = 0; j < map->lines[triangle.p[index]->lineInd]->shareEnd22->size(); ++j){
+							if (map->lines[triangle.p[index]->lineInd]->shareEnd11->at(i) ==
+								map->lines[triangle.p[index]->lineInd]->shareEnd22->at(j) &&
+								map->lines[map->lines[triangle.p[index]->lineInd]->shareEnd11->at(i)]->kept == 2)
+								return false;
+						}
+					}
+					for (int i = 0; i < map->lines[triangle.p[index]->lineInd]->shareEnd12->size(); ++i){
+						for (int j = 0; j < map->lines[triangle.p[index]->lineInd]->shareEnd21->size(); ++j){
+							if (map->lines[triangle.p[index]->lineInd]->shareEnd12->at(i) ==
+								map->lines[triangle.p[index]->lineInd]->shareEnd21->at(j) &&
+								map->lines[map->lines[triangle.p[index]->lineInd]->shareEnd12->at(i)]->kept == 2)
+								return false;
+						}
+					}
+				}
+				--map->lines[triangle.p[index]->lineInd]->kept;
 				triangle.p[index]->kept = false;
 				qTreeLine->remove(triangle.p[index]);
 				triangle.p[index] = triangle.p[(index + 2) % 3];
@@ -104,31 +141,31 @@ void Simplifier::simplify(){
 	do{
 		begin = clock();
 		for (int i = 0; i < map->lines.size(); ++i){
-			triangle.p[0] = &map->lines[i].points[0];
+			triangle.p[0] = &map->lines[i]->points[0];
 			next = 1;
 			current = 1;
-			while (!map->lines[i].points[next].kept)
+			while (!map->lines[i]->points[next].kept)
 				++next;
-			if (map->lines[i].points[next] == map->lines[i].points[map->lines[i].points.size() - 1])
+			if (map->lines[i]->points[next] == map->lines[i]->points[map->lines[i]->points.size() - 1])
 				continue;
-			triangle.p[1] = &map->lines[i].points[next];
-			last = map->lines[i].points.size() - 1;
-			if (*(triangle.p[0]) == &map->lines[i].points[last]){
+			triangle.p[1] = &map->lines[i]->points[next];
+			last = map->lines[i]->points.size() - 1;
+			if (*(triangle.p[0]) == &map->lines[i]->points[last]){
 				for (int j = next; j < last; ++j){
-					if (map->lines[i].kept == 4)
+					if (map->lines[i]->kept == 4)
 						break;
-					while (j < last && !map->lines[i].points[j + 1].kept)
+					while (j < last && !map->lines[i]->points[j + 1].kept)
 						++j;
-					triangle.p[(current + 1) % 3] = &map->lines[i].points[j + 1];
+					triangle.p[(current + 1) % 3] = &map->lines[i]->points[j + 1];
 					removeP(triangle, current % 3);
 					++current;
 				}
 			}
 			else{
 				for (int j = next; j < last; ++j){
-					while (j < last && !map->lines[i].points[j + 1].kept)
+					while (j < last && !map->lines[i]->points[j + 1].kept)
 						++j;
-					triangle.p[(current + 1) % 3] = &map->lines[i].points[j + 1];
+					triangle.p[(current + 1) % 3] = &map->lines[i]->points[j + 1];
 					removeP(triangle, current % 3);
 					++current;
 				}

@@ -23,8 +23,8 @@ QuadTree::QuadTree(LineSet* map) :Index()
 	subTree[2] = NULL;
 	subTree[3] = NULL;
 	for (int i = 0; i < map->lines.size(); ++i){
-		for (int j = 1; j < map->lines[i].points.size() - 1; ++j){
-			insert(&map->lines[i].points[j]);
+		for (int j = 1; j < map->lines[i]->points.size() - 1; ++j){
+			insert(&map->lines[i]->points[j]);
 		}
 	}
 }
@@ -39,8 +39,8 @@ QuadTree::QuadTree(LineSet* map, int mark) :Index()
 	subTree[2] = NULL;
 	subTree[3] = NULL;
 	for (int i = 0; i < map->lines.size(); ++i){
-		insert(&map->lines[i].points[0]);
-		insert(&map->lines[i].points[map->lines[i].points.size() - 1]);
+		insert(&map->lines[i]->points[0]);
+		insert(&map->lines[i]->points[map->lines[i]->points.size() - 1]);
 	}
 }
 
@@ -55,9 +55,71 @@ QuadTree::QuadTree(LineSet* map, PointSet* points) :Index()
 	subTree[3] = NULL;
 	for (int i = 0; i < points->points.size(); ++i)
 		insert(&points->points[i]);
-	for (int i = 0; i < map->lines.size(); ++i){
-		insert(&map->lines[i].points[0]);
-		insert(&map->lines[i].points[map->lines[i].points.size() - 1]);
+	Point* temp;
+	vector<int>* dup1, *dup2;
+	for (int i = 0; i < map->lines.size(); ++i){ // find lines sharing endpoints
+		temp = insert(&map->lines[i]->points[0]);
+		if (temp != &map->lines[i]->points[0] && temp->lineInd != i){
+			if (temp->pointInd == 0){
+				dup1 = map->lines[temp->lineInd]->shareEnd11;
+				dup2 = map->lines[temp->lineInd]->shareEnd12;
+				for (int j = 0; j < dup1->size(); ++j){
+					map->lines[dup1->at(j)]->shareEnd11->push_back(i);
+					map->lines[i]->shareEnd11->push_back(dup1->at(j));
+				}
+				for (int j = 0; j < dup2->size(); ++j){
+					map->lines[dup2->at(j)]->shareEnd21->push_back(i);
+					map->lines[i]->shareEnd12->push_back(dup2->at(j));
+				}
+				map->lines[temp->lineInd]->shareEnd11->push_back(i);
+				map->lines[i]->shareEnd11->push_back(temp->lineInd);
+			}
+			else{
+				dup1 = map->lines[temp->lineInd]->shareEnd21;
+				dup2 = map->lines[temp->lineInd]->shareEnd22;
+				for (int j = 0; j < dup1->size(); ++j){
+					map->lines[dup1->at(j)]->shareEnd11->push_back(i);
+					map->lines[i]->shareEnd11->push_back(dup1->at(j));
+				}
+				for (int j = 0; j < dup2->size(); ++j){
+					map->lines[dup2->at(j)]->shareEnd21->push_back(i);
+					map->lines[i]->shareEnd12->push_back(dup2->at(j));
+				}
+				map->lines[temp->lineInd]->shareEnd21->push_back(i);
+				map->lines[i]->shareEnd12->push_back(temp->lineInd);
+			}
+		}
+		temp = insert(&map->lines[i]->points[map->lines[i]->points.size() - 1]);
+		if (temp != &map->lines[i]->points[map->lines[i]->points.size() - 1]){
+			if (temp->pointInd == 0){
+				dup1 = map->lines[temp->lineInd]->shareEnd11;
+				dup2 = map->lines[temp->lineInd]->shareEnd12;
+				for (int j = 0; j < dup1->size(); ++j){
+					map->lines[dup1->at(j)]->shareEnd12->push_back(i);
+					map->lines[i]->shareEnd21->push_back(dup1->at(j));
+				}
+				for (int j = 0; j < dup2->size(); ++j){
+					map->lines[dup2->at(j)]->shareEnd22->push_back(i);
+					map->lines[i]->shareEnd22->push_back(dup2->at(j));
+				}
+				map->lines[temp->lineInd]->shareEnd12->push_back(i);
+				map->lines[i]->shareEnd21->push_back(temp->lineInd);
+			}
+			else{
+				dup1 = map->lines[temp->lineInd]->shareEnd21;
+				dup2 = map->lines[temp->lineInd]->shareEnd22;
+				for (int j = 0; j < dup1->size(); ++j){
+					map->lines[dup1->at(j)]->shareEnd12->push_back(i);
+					map->lines[i]->shareEnd21->push_back(dup1->at(j));
+				}
+				for (int j = 0; j < dup2->size(); ++j){
+					map->lines[dup2->at(j)]->shareEnd22->push_back(i);
+					map->lines[i]->shareEnd22->push_back(dup2->at(j));
+				}
+				map->lines[temp->lineInd]->shareEnd22->push_back(i);
+				map->lines[i]->shareEnd22->push_back(temp->lineInd);
+			}
+		}
 	}
 }
 QuadTree::QuadTree(PointSet* points) :Index()
@@ -82,25 +144,37 @@ QuadTree::~QuadTree(){
 	}
 }
 
-bool QuadTree::insert(const Point* newPoint){
+Point* QuadTree::insert(const Point* newPoint){
 	if (!isInside(newPoint))
-		return false;
+		return NULL;
 	if (size == 0){
 		point = newPoint;
 		size = 1;
-		return true;
+		return (Point*)newPoint;
 	}
 	else if (point != NULL && point->x == newPoint->x && point->y == newPoint->y){
-		return false;
+		return (Point*)point;
 	}
 	if (subTree[0] == NULL)
 		subDivid();
-	if (subTree[0]->insert(newPoint) || subTree[1]->insert(newPoint) ||
-		subTree[2]->insert(newPoint) || subTree[3]->insert(newPoint)){
+	Point* p1 = subTree[0]->insert(newPoint);
+	Point* p2 = subTree[1]->insert(newPoint);
+	Point* p3 = subTree[2]->insert(newPoint);
+	Point* p4 = subTree[3]->insert(newPoint);
+	if (p1 == newPoint || p2 == newPoint ||
+		p3 == newPoint || p4 == newPoint){
 		++size;
-		return true;
+		return (Point*)newPoint;
 	}
-	return false;
+	else if (p1 != NULL)
+		return p1;
+	else if (p2 != NULL)
+		return p2;
+	else if (p3 != NULL)
+		return p3;
+	else if (p4 != NULL)
+		return p4;
+	return NULL;
 }
 
 bool QuadTree::subDivid(){
@@ -166,20 +240,6 @@ bool QuadTree::remove(const Point* newPoint){
 		size = 0;
 		return true;
 	}
-}
-
-void QuadTree::isDup(const Point* Point, vector<int>* dup){
-	if (!isInside(Point) || size == 0)
-		return;
-	if (point != NULL){
-		if (point->x == Point->x && point->y == Point->y)
-			dup->push_back(point->lineInd);
-		return;
-	}
-	subTree[0]->isDup(Point, dup);
-	subTree[1]->isDup(Point, dup);
-	subTree[2]->isDup(Point, dup);
-	subTree[3]->isDup(Point, dup);
 }
 
 inline bool QuadTree::hasPointInTri(Triangle* triangle){

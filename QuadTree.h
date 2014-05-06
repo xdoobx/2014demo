@@ -8,7 +8,6 @@ class QuadTree: private Index
 private:
 	bool subDivid();
 	inline bool isInTri(Triangle* triangle, double x, double y);
-	void isDup(const Point* Point, vector<int>* dup);
 public:
 	Rect range;
 	int size;
@@ -22,7 +21,7 @@ public:
 	QuadTree(LineSet* map, PointSet* points);
 	QuadTree(PointSet* points);
 	~QuadTree();
-	bool insert(const Point* point);
+	Point* insert(const Point* point);
 	inline bool isInside(const Point* point){ return range.isInside(point->x, point->y); }
 	inline bool hasPointInTri(Triangle* triangle);
 	void pointInTri(Triangle* triangle, vector<Point*>* record);

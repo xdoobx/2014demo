@@ -29,8 +29,8 @@ LineSet* readLines(string filename)
 		id = fileline.substr(0, fileline.find_first_of(':'));
 		fileline = fileline.substr(120 + id.size());
 		fileline = fileline.substr(0, fileline.size() - 35);
-		Line line;
-		line.id = id;
+		Line* line = new Line;
+		line->id = id;
 		strpos = (char*)fileline.c_str();
 		while (strpos[0] != '\0'){
 			point.x = strtod(strpos, &strpos);
@@ -45,13 +45,11 @@ LineSet* readLines(string filename)
 				map->maxY = point.y;
 			else if (map->minY > point.y)
 				map->minY = point.y;
-			point.pointInd = line.points.size();
+			point.pointInd = line->points.size();
 			point.lineInd = map->lines.size();
-			line.points.push_back(point);
-			++line.kept;
+			line->points.push_back(point);
+			++line->kept;
 		}
-		line.points[0].kept = true;
-		line.points[line.points.size() - 1].kept = true;
 		map->lines.push_back(line);
 		pos1 = pos2 + 1;
 		pos2 = file.find('\n', pos1);
@@ -112,10 +110,10 @@ void writeLines(LineSet* map, string filename)
 	ofstream fout(filename);
 	fout.precision(std::numeric_limits< double >::digits10);
 	for (int i = 0; i < map->lines.size(); ++i){
-		fout << map->lines[i].id << ':' << map->gmlLineString << map->gmlCoordinates;
-		for (int j = 0; j < map->lines[i].points.size(); ++j){
-			if (map->lines[i].points[j].kept)
-				fout << map->lines[i].points[j].x << ',' << map->lines[i].points[j].y << ' ';
+		fout << map->lines[i]->id << ':' << map->gmlLineString << map->gmlCoordinates;
+		for (int j = 0; j < map->lines[i]->points.size(); ++j){
+			if (map->lines[i]->points[j].kept)
+				fout << map->lines[i]->points[j].x << ',' << map->lines[i]->points[j].y << ' ';
 		}
 		fout << map->endCoordinates << map->endLineString << endl;
 	}

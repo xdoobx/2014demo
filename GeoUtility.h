@@ -13,8 +13,10 @@ struct Point
 	int pointInd = -1;
 	Point(){}
 	Point(double X, double Y) :x(X), y(Y){}
-	bool operator==(Point* point){ return x == point->x && y == point->y; }
-	bool operator==(Point point){ return x == point.x && y == point.y; }
+	bool operator==(const Point* point){ return x == point->x && y == point->y; }
+	bool operator==(const Point point){ return x == point.x && y == point.y; }
+	bool operator!=(const Point* point){ return x != point->x || y != point->y; }
+	bool operator!=(const Point point){ return x != point.x || y != point.y; }
 };
 
 struct PointSet
@@ -35,8 +37,17 @@ struct Line
 	string id;
 	int kept = 0;
 	vector<Point> points;
-	vector<int>* share = NULL;
-	~Line(){ delete share; }
+	vector<int>* shareEnd11 = new vector<int>();
+	vector<int>* shareEnd12 = new vector<int>();
+	vector<int>* shareEnd21 = new vector<int>();
+	vector<int>* shareEnd22 = new vector<int>();
+
+	~Line(){
+		delete shareEnd11;
+		delete shareEnd12;
+		delete shareEnd21;
+		delete shareEnd22;
+	}
 };
 
 struct LineSet
@@ -45,11 +56,12 @@ struct LineSet
 	const char* gmlCoordinates = "<gml:coordinates decimal=\".\" cs=\",\" ts=\" \">";
 	const char* endCoordinates = "</gml:coordinates>";
 	const char* endLineString = "</gml:LineString>";
-	vector<Line> lines;
+	vector<Line*> lines;
 	double minX;
 	double maxX;
 	double minY;
 	double maxY;
+	~LineSet(){ for (int i = 0; i < lines.size(); ++i) delete lines[i]; }
 };
 
 struct Rect
@@ -64,6 +76,7 @@ struct Rect
 	bool isInside(double x, double y){ return x <= maxX && x > minX && y <= maxY && y > minY; }
 };
 
+//can be faster
 struct Triangle
 {
 	Point* p[3];
