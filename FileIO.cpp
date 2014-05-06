@@ -54,7 +54,6 @@ LineSet* readLines(string filename)
 		pos1 = pos2 + 1;
 		pos2 = file.find('\n', pos1);
 	}
-
 	return map;
 }
 

@@ -121,6 +121,7 @@ QuadTree::QuadTree(LineSet* map, PointSet* points) :Index()
 			}
 		}
 	}
+	map->getShare();
 }
 QuadTree::QuadTree(PointSet* points) :Index()
 {
@@ -207,18 +208,16 @@ inline bool QuadTree::isInTri(const Triangle* triangle, double x, double y){
 
 inline bool QuadTree::isCross(const Point* p1, const Point* p2,
 	const double& p3x, const double& p3y, const double& p4x, const double& p4y){
-	double prod1 = (p3x - p1->x)*(p2->y - p3y) -
-		(p3x - p2->x)*(p1->y - p3y);
-	double prod2 = (p4x - p1->x)*(p2->y - p4y) -
-		(p4x - p2->x)*(p1->y - p4y);
+	double prod1 = (p3x - p1->x)*(p2->y - p3y) - (p3x - p2->x)*(p1->y - p3y);
+	double prod2 = (p4x - p1->x)*(p2->y - p4y) - (p4x - p2->x)*(p1->y - p4y);
 	if ((prod1 > 0) == (prod2 > 0) || prod1 == 0 || prod2 == 0)
 		return false;
-	prod1 = (p1->x - p3x)*(p4y - p1->y) -
-		(p1->x - p4x)*(p3y - p1->y);
-	prod2 = (p2->x - p3x)*(p4y - p2->y) -
-		(p2->x - p4x)*(p3y - p2->y);
+
+	prod1 = (p1->x - p3x)*(p4y - p1->y) - (p1->x - p4x)*(p3y - p1->y);
+	prod2 = (p2->x - p3x)*(p4y - p2->y) - (p2->x - p4x)*(p3y - p2->y);
 	if ((prod1 > 0) == (prod2 > 0) || prod1 == 0 || prod2 == 0)
 		return false;
+
 	return true;
 }
 
@@ -265,13 +264,13 @@ bool QuadTree::remove(const Point* newPoint){
 			}
 			return true;
 		}
-		else return false;
 	}
 	else{
 		point = NULL;
 		size = 0;
 		return true;
 	}
+	return false;
 }
 
 inline bool QuadTree::hasPointInTri(const Triangle* triangle){
@@ -284,8 +283,8 @@ inline bool QuadTree::hasPointInTri(const Triangle* triangle){
 		return false;
 	else if(!isInside(triangle->p[0]) && !isInside(triangle->p[1]) && !isInside(triangle->p[2]) && // triangle point in rec
 		!isInTri(triangle, range.maxX, range.maxY) && !isInTri(triangle, range.minX, range.minY) &&
-		!isInTri(triangle, range.maxX, range.minY) && !isInTri(triangle, range.minX, range.maxY) &&
-		!isIntersect(triangle)) // rec point in triangle
+		!isInTri(triangle, range.maxX, range.minY) && !isInTri(triangle, range.minX, range.maxY) && // rec point in triangle
+		!isIntersect(triangle)) 
 		//outside each other
 		return false;
 	else{ //intersect and have more than 1 points
@@ -308,7 +307,7 @@ void QuadTree::pointInTri(const Triangle* triangle, vector<Point*>* v){
 	else if(!isInside(triangle->p[0]) && !isInside(triangle->p[1]) && !isInside(triangle->p[2]) && // triangle point in rec
 		!isInTri(triangle, range.maxX, range.maxY) && !isInTri(triangle, range.minX, range.minY) &&
 		!isInTri(triangle, range.maxX, range.minY) && !isInTri(triangle, range.minX, range.maxY) && // rec point in triangle
-		!isIntersect(triangle)){ //and their segments do not intersect
+		!isIntersect(triangle)){ //their segments do not intersect
 		//outside each other
 		return;
 	}

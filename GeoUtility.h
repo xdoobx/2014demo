@@ -41,12 +41,14 @@ struct Line
 	vector<int>* shareEnd12 = new vector<int>();
 	vector<int>* shareEnd21 = new vector<int>();
 	vector<int>* shareEnd22 = new vector<int>();
+	vector<int>* shareEnd = new vector<int>();
 
 	~Line(){
 		delete shareEnd11;
 		delete shareEnd12;
 		delete shareEnd21;
 		delete shareEnd22;
+		delete shareEnd;
 	}
 };
 
@@ -61,6 +63,23 @@ struct LineSet
 	double maxX;
 	double minY;
 	double maxY;
+
+	void getShare(){
+		for (int i = 0; i < lines.size(); ++i){
+			for (int j = 0; j < lines[i]->shareEnd11->size(); ++j){
+				for (int k = 0; k < lines[i]->shareEnd22->size(); ++k){
+					if (lines[i]->shareEnd11->at(j) == lines[i]->shareEnd22->at(k))
+						lines[i]->shareEnd->push_back(lines[i]->shareEnd11->at(j));
+				}
+			}
+			for (int j = 0; j < lines[i]->shareEnd12->size(); ++j){
+				for (int k = 0; k < lines[i]->shareEnd21->size(); ++k){
+					if (lines[i]->shareEnd12->at(j) == lines[i]->shareEnd21->at(k))
+						lines[i]->shareEnd->push_back(lines[i]->shareEnd12->at(j));
+				}
+			}
+		}
+	}
 	~LineSet(){ for (int i = 0; i < lines.size(); ++i) delete lines[i]; }
 };
 

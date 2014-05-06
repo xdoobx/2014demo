@@ -53,21 +53,9 @@ inline bool Simplifier::removeP(Triangle &triangle, int index){
 	if (!qTreePoint->hasPointInTri(&triangle)){
 		if (!qTreeLine->hasPointInTri(&triangle)){
 			if (map->lines[triangle.p[index]->lineInd]->kept == 3){
-				for (int i = 0; i < map->lines[triangle.p[index]->lineInd]->shareEnd11->size(); ++i){
-					for (int j = 0; j < map->lines[triangle.p[index]->lineInd]->shareEnd22->size(); ++j){
-						if (map->lines[triangle.p[index]->lineInd]->shareEnd11->at(i) ==
-							map->lines[triangle.p[index]->lineInd]->shareEnd22->at(j) &&
-							map->lines[map->lines[triangle.p[index]->lineInd]->shareEnd11->at(i)]->kept == 2)
-							return false;
-					}
-				}
-				for (int i = 0; i < map->lines[triangle.p[index]->lineInd]->shareEnd12->size(); ++i){
-					for (int j = 0; j < map->lines[triangle.p[index]->lineInd]->shareEnd21->size(); ++j){
-						if (map->lines[triangle.p[index]->lineInd]->shareEnd12->at(i) ==
-							map->lines[triangle.p[index]->lineInd]->shareEnd21->at(j) &&
-							map->lines[map->lines[triangle.p[index]->lineInd]->shareEnd12->at(i)]->kept == 2)
-							return false;
-					}
+				for (int i = 0; i < map->lines[triangle.p[index]->lineInd]->shareEnd->size(); ++i){
+					if (map->lines[map->lines[triangle.p[index]->lineInd]->shareEnd->at(i)]->kept == 2)
+						return false;
 				}
 			}
 			--map->lines[triangle.p[index]->lineInd]->kept;
@@ -104,21 +92,9 @@ inline bool Simplifier::removeP(Triangle &triangle, int index){
 			delete constraint;
 			if (success){
 				if (map->lines[triangle.p[index]->lineInd]->kept == 3){
-					for (int i = 0; i < map->lines[triangle.p[index]->lineInd]->shareEnd11->size(); ++i){
-						for (int j = 0; j < map->lines[triangle.p[index]->lineInd]->shareEnd22->size(); ++j){
-							if (map->lines[triangle.p[index]->lineInd]->shareEnd11->at(i) ==
-								map->lines[triangle.p[index]->lineInd]->shareEnd22->at(j) &&
-								map->lines[map->lines[triangle.p[index]->lineInd]->shareEnd11->at(i)]->kept == 2)
-								return false;
-						}
-					}
-					for (int i = 0; i < map->lines[triangle.p[index]->lineInd]->shareEnd12->size(); ++i){
-						for (int j = 0; j < map->lines[triangle.p[index]->lineInd]->shareEnd21->size(); ++j){
-							if (map->lines[triangle.p[index]->lineInd]->shareEnd12->at(i) ==
-								map->lines[triangle.p[index]->lineInd]->shareEnd21->at(j) &&
-								map->lines[map->lines[triangle.p[index]->lineInd]->shareEnd12->at(i)]->kept == 2)
-								return false;
-						}
+					for (int i = 0; i < map->lines[triangle.p[index]->lineInd]->shareEnd->size(); ++i){
+						if (map->lines[map->lines[triangle.p[index]->lineInd]->shareEnd->at(i)]->kept == 2)
+							return false;
 					}
 				}
 				--map->lines[triangle.p[index]->lineInd]->kept;
