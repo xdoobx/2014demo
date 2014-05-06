@@ -8,7 +8,6 @@ class Simplifier{
 private:
 	QuadTree* qTreeLine;
 	QuadTree* qTreePoint;
-	//QuadTree* qTreeEnd;
 	LineSet* map;
 	PointSet* points;
 	int orig_size;
@@ -16,7 +15,7 @@ private:
 public:
 	Simplifier(char* lineFile, char* pointFile);
 	~Simplifier();
-	void simplify();
+	void simplify(int limit);
 	LineSet* getMap()const{ return map; }
 	void wirteFile(string writeFile);
 };

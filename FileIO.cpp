@@ -109,7 +109,6 @@ void writeLines(LineSet* map, string filename)
 {
 	FILE * pFile;
 	fopen_s(&pFile, filename.c_str(), "w");
-	//ofstream fout(filename);
 	stringstream output;
 	output.precision(std::numeric_limits< double >::digits10);
 	for (int i = 0; i < map->lines.size(); ++i){
@@ -122,5 +121,5 @@ void writeLines(LineSet* map, string filename)
 	}
 	string result = output.str();
 	fwrite(result.c_str(), sizeof(char), result.size(), pFile);
-	//fout.close();
+	fclose(pFile);
 }

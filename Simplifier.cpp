@@ -25,7 +25,6 @@ Simplifier::Simplifier(char* lineFile, char* pointFile){
 	LineSet* Map = readLines(lineFile);
 	PointSet* Points = readPoints(pointFile);
 	qTreeLine = new QuadTree(Map);
-	//qTreeEnd = new QuadTree(Map, 0);
 	qTreePoint = new QuadTree(Map, Points);
 	map = Map;
 	points = Points;
@@ -133,14 +132,14 @@ inline bool Simplifier::removeP(Triangle &triangle, int index){
 	return false;
 }
 
-void Simplifier::simplify(){
+void Simplifier::simplify(int limit){
 	Triangle triangle;
 	int current;
 	int next;
 	int last;
-	int removed;
+	int removed = 1, total_removed = 0;
 	clock_t begin, end;
-	do{
+	while(total_removed < limit && removed != 0){
 		begin = clock();
 		for (int i = 0; i < map->lines.size(); ++i){
 			triangle.p[0] = &map->lines[i]->points[0];
@@ -179,9 +178,8 @@ void Simplifier::simplify(){
 		}
 		end = clock();
 		removed = orig_size - qTreeLine->size;
+		total_removed += removed;
 		orig_size = qTreeLine->size;
 		cout << "remove points: " << removed << "\ttime cost: " << end - begin << endl;
-	} while (removed != 0);
-	//int id = 1000;
-	//indexView(qTreeLine, map, id);
+	}
 }
