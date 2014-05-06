@@ -107,15 +107,20 @@ PointSet* readPoints(string filename)
 
 void writeLines(LineSet* map, string filename)
 {
-	ofstream fout(filename);
-	fout.precision(std::numeric_limits< double >::digits10);
+	FILE * pFile;
+	fopen_s(&pFile, filename.c_str(), "w");
+	//ofstream fout(filename);
+	stringstream output;
+	output.precision(std::numeric_limits< double >::digits10);
 	for (int i = 0; i < map->lines.size(); ++i){
-		fout << map->lines[i]->id << ':' << map->gmlLineString << map->gmlCoordinates;
+		output << map->lines[i]->id << ':' << map->gmlLineString << map->gmlCoordinates;
 		for (int j = 0; j < map->lines[i]->points.size(); ++j){
 			if (map->lines[i]->points[j].kept)
-				fout << map->lines[i]->points[j].x << ',' << map->lines[i]->points[j].y << ' ';
+				output << map->lines[i]->points[j].x << ',' << map->lines[i]->points[j].y << ' ';
 		}
-		fout << map->endCoordinates << map->endLineString << endl;
+		output << map->endCoordinates << map->endLineString << endl;
 	}
-	fout.close();
+	string result = output.str();
+	fwrite(result.c_str(), sizeof(char), result.size(), pFile);
+	//fout.close();
 }

@@ -7,10 +7,10 @@ class QuadTree: private Index
 {
 private:
 	bool subDivid();
-	inline bool isInTri(Triangle* triangle, double x, double y);
-	inline bool isCross(Point* p1, Point* p2,
+	inline bool isInTri(const Triangle* triangle, double x, double y);
+	inline bool isCross(const Point* p1, const Point* p2,
 		const double& p3x, const double& p3y, const double& p4x, const double& p4y);
-	inline bool isIntersect(Triangle* triangle);
+	inline bool isIntersect(const Triangle* triangle);
 public:
 	Rect range;
 	int size;
@@ -26,8 +26,8 @@ public:
 	~QuadTree();
 	Point* insert(const Point* point);
 	inline bool isInside(const Point* point){ return range.isInside(point->x, point->y); }
-	inline bool hasPointInTri(Triangle* triangle);
-	void pointInTri(Triangle* triangle, vector<Point*>* record);
+	inline bool hasPointInTri(const Triangle* triangle);
+	void pointInTri(const Triangle* triangle, vector<Point*>* record);
 	bool remove(const Point* point);
 };
 

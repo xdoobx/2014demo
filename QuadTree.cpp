@@ -194,7 +194,7 @@ bool QuadTree::subDivid(){
 	return false;
 }
 
-inline bool QuadTree::isInTri(Triangle* triangle, double x, double y){
+inline bool QuadTree::isInTri(const Triangle* triangle, double x, double y){
 	double prod1 = (x - triangle->p[1]->x)*(triangle->p[0]->y - y) -
 		(x - triangle->p[0]->x)*(triangle->p[1]->y - y);
 	double prod2 = (x - triangle->p[2]->x)*(triangle->p[0]->y - y) -
@@ -205,7 +205,7 @@ inline bool QuadTree::isInTri(Triangle* triangle, double x, double y){
 	return (prod1 > 0) != (prod2 > 0) && (prod2 > 0) != (prod3 > 0) && (prod1 != 0 || prod3 != 0);
 }
 
-inline bool QuadTree::isCross(Point* p1, Point* p2,
+inline bool QuadTree::isCross(const Point* p1, const Point* p2,
 	const double& p3x, const double& p3y, const double& p4x, const double& p4y){
 	double prod1 = (p3x - p1->x)*(p2->y - p3y) -
 		(p3x - p2->x)*(p1->y - p3y);
@@ -222,19 +222,19 @@ inline bool QuadTree::isCross(Point* p1, Point* p2,
 	return true;
 }
 
-inline bool QuadTree::isIntersect(Triangle* triangle){
+inline bool QuadTree::isIntersect(const Triangle* triangle){
 	return isCross(triangle->p[0], triangle->p[1], range.minX, range.minY, range.maxX, range.minY) ||
 		isCross(triangle->p[0], triangle->p[2], range.minX, range.minY, range.maxX, range.minY) ||
 		isCross(triangle->p[2], triangle->p[1], range.minX, range.minY, range.maxX, range.minY) ||
-		isCross(triangle->p[0], triangle->p[1], range.maxX, range.maxY, range.maxX, range.minY) ||
-		isCross(triangle->p[0], triangle->p[2], range.maxX, range.maxY, range.maxX, range.minY) ||
-		isCross(triangle->p[2], triangle->p[1], range.maxX, range.maxY, range.maxX, range.minY) ||
-		isCross(triangle->p[0], triangle->p[1], range.minX, range.minY, range.minX, range.maxY) ||
-		isCross(triangle->p[0], triangle->p[2], range.minX, range.minY, range.minX, range.maxY) ||
-		isCross(triangle->p[2], triangle->p[1], range.minX, range.minY, range.minX, range.maxY) ||
-		isCross(triangle->p[0], triangle->p[1], range.minX, range.maxY, range.maxX, range.maxY) ||
-		isCross(triangle->p[0], triangle->p[2], range.minX, range.maxY, range.maxX, range.maxY) ||
-		isCross(triangle->p[2], triangle->p[1], range.minX, range.maxY, range.maxX, range.maxY);
+		isCross(triangle->p[0], triangle->p[1], range.maxX, range.minY, range.maxX, range.maxY) ||
+		isCross(triangle->p[0], triangle->p[2], range.maxX, range.minY, range.maxX, range.maxY) ||
+		isCross(triangle->p[2], triangle->p[1], range.maxX, range.minY, range.maxX, range.maxY) ||
+		isCross(triangle->p[0], triangle->p[1], range.maxX, range.maxY, range.minX, range.maxY) ||
+		isCross(triangle->p[0], triangle->p[2], range.maxX, range.maxY, range.minX, range.maxY) ||
+		isCross(triangle->p[2], triangle->p[1], range.maxX, range.maxY, range.minX, range.maxY) ||
+		isCross(triangle->p[0], triangle->p[1], range.minX, range.maxY, range.minX, range.minY) ||
+		isCross(triangle->p[0], triangle->p[2], range.minX, range.maxY, range.minX, range.minY) ||
+		isCross(triangle->p[2], triangle->p[1], range.minX, range.maxY, range.minX, range.minY);
 }
 
 bool QuadTree::remove(const Point* newPoint){
@@ -274,7 +274,7 @@ bool QuadTree::remove(const Point* newPoint){
 	}
 }
 
-inline bool QuadTree::hasPointInTri(Triangle* triangle){
+inline bool QuadTree::hasPointInTri(const Triangle* triangle){
 	if (size == 0)
 		return false;
 	else if (size == 1)
@@ -294,7 +294,7 @@ inline bool QuadTree::hasPointInTri(Triangle* triangle){
 	}
 }
 
-void QuadTree::pointInTri(Triangle* triangle, vector<Point*>* v){
+void QuadTree::pointInTri(const Triangle* triangle, vector<Point*>* v){
 	if (size == 0)
 		return;
 	else if (size == 1){
@@ -307,8 +307,8 @@ void QuadTree::pointInTri(Triangle* triangle, vector<Point*>* v){
 		return;
 	else if(!isInside(triangle->p[0]) && !isInside(triangle->p[1]) && !isInside(triangle->p[2]) && // triangle point in rec
 		!isInTri(triangle, range.maxX, range.maxY) && !isInTri(triangle, range.minX, range.minY) &&
-		!isInTri(triangle, range.maxX, range.minY) && !isInTri(triangle, range.minX, range.maxY) &&
-		!isIntersect(triangle)){ // rec point in triangle
+		!isInTri(triangle, range.maxX, range.minY) && !isInTri(triangle, range.minX, range.maxY) && // rec point in triangle
+		!isIntersect(triangle)){ //and their segments do not intersect
 		//outside each other
 		return;
 	}
