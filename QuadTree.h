@@ -8,6 +8,9 @@ class QuadTree: private Index
 private:
 	bool subDivid();
 	inline bool isInTri(Triangle* triangle, double x, double y);
+	inline bool isCross(Point* p1, Point* p2,
+		const double& p3x, const double& p3y, const double& p4x, const double& p4y);
+	inline bool isIntersect(Triangle* triangle);
 public:
 	Rect range;
 	int size;

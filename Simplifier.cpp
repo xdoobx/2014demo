@@ -95,6 +95,8 @@ inline bool Simplifier::removeP(Triangle &triangle, int index){
 				tri.p[0] = &map->lines[toRm->lineInd]->points[pre_ind];
 				tri.p[1] = toRm;
 				tri.p[2] = &map->lines[toRm->lineInd]->points[next_ind];
+				tri.sortX();
+				tri.sortY();
 				if (!removeP(tri, 1)){
 					success = false;
 					break;
@@ -157,6 +159,8 @@ void Simplifier::simplify(){
 					while (j < last && !map->lines[i]->points[j + 1].kept)
 						++j;
 					triangle.p[(current + 1) % 3] = &map->lines[i]->points[j + 1];
+					triangle.sortX();
+					triangle.sortY();
 					removeP(triangle, current % 3);
 					++current;
 				}
@@ -166,6 +170,8 @@ void Simplifier::simplify(){
 					while (j < last && !map->lines[i]->points[j + 1].kept)
 						++j;
 					triangle.p[(current + 1) % 3] = &map->lines[i]->points[j + 1];
+					triangle.sortX();
+					triangle.sortY();
 					removeP(triangle, current % 3);
 					++current;
 				}

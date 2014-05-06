@@ -81,38 +81,66 @@ struct Triangle
 {
 	Point* p[3];
 	Triangle(){}
-	Triangle(Point* P1, Point* P2, Point* P3){ p[0] = P1; p[1] = P2; p[2] = P3; }
-	double minX(){
-		if (p[0]->x < p[1]->x && p[0]->x < p[2]->x)
-			return p[0]->x;
-		else if (p[1]->x < p[2]->x)
-			return p[1]->x;
-		else
-			return p[2]->x;
+	Triangle(Point* P1, Point* P2, Point* P3){ p[0] = P1; p[1] = P2; p[2] = P3; sortX(); sortY(); }
+	double maxX;
+	double minX;
+	double maxY;
+	double minY;
+	inline void sortX(){
+		if (p[0]->x < p[1]->x){
+			if (p[0]->x < p[2]->x){
+				minX = p[0]->x;
+				if (p[1]->x > p[2]->x)
+					maxX = p[1]->x;
+				else
+					maxX = p[2]->x;
+			}
+			else{
+				minX = p[2]->x;
+				maxX = p[1]->x;
+			}
+		}
+		else{
+			if (p[1]->x < p[2]->x){
+				minX = p[1]->x;
+				if (p[0]->x > p[2]->x)
+					maxX = p[0]->x;
+				else
+					maxX = p[2]->x;
+			}
+			else{
+				minX = p[2]->x;
+				maxX = p[0]->x;
+			}
+		}
 	}
-	double maxX(){
-		if (p[0]->x > p[1]->x && p[0]->x > p[2]->x)
-			return p[0]->x;
-		else if (p[1]->x > p[2]->x)
-			return p[1]->x;
-		else
-			return p[2]->x;
-	}
-	double minY(){
-		if (p[0]->y < p[1]->y && p[0]->y < p[2]->y)
-			return p[0]->y;
-		else if (p[1]->y < p[2]->y)
-			return p[1]->y;
-		else
-			return p[2]->y;
-	}
-	double maxY(){
-		if (p[0]->y > p[1]->y && p[0]->y > p[2]->y)
-			return p[0]->y;
-		else if (p[1]->y > p[2]->y)
-			return p[1]->y;
-		else
-			return p[2]->y;
+	inline void sortY(){
+		if (p[0]->y < p[1]->y){
+			if (p[0]->y < p[2]->y){
+				minY = p[0]->y;
+				if (p[1]->y > p[2]->y)
+					maxY = p[1]->y;
+				else
+					maxY = p[2]->y;
+			}
+			else{
+				minY = p[2]->y;
+				maxY = p[1]->y;
+			}
+		}
+		else{
+			if (p[1]->y < p[2]->y){
+				minY = p[1]->y;
+				if (p[0]->y > p[2]->y)
+					maxY = p[0]->y;
+				else
+					maxY = p[2]->y;
+			}
+			else{
+				minY = p[2]->y;
+				maxY = p[0]->y;
+			}
+		}
 	}
 };
 
