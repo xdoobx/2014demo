@@ -7,7 +7,6 @@ LineSet* readLines(string filename)
 	LineSet* map = new LineSet;
 	ifstream fin(filename, std::ios::binary | std::ios::ate);
 	string fileline;
-	Point point;
 	char* strpos;
 	string id;
 
@@ -24,6 +23,7 @@ LineSet* readLines(string filename)
 	map->maxX = map->minX = strtod(fileline.c_str(), &strpos);
 	map->maxY = map->minY = strtod(++strpos, &strpos);
 
+	clock_t begin = clock();
 	while (pos2 != -1){
 		fileline = file.substr(pos1, pos2 - pos1);
 		id = fileline.substr(0, fileline.find_first_of(':'));
@@ -33,20 +33,21 @@ LineSet* readLines(string filename)
 		line->id = id;
 		strpos = (char*)fileline.c_str();
 		while (strpos[0] != '\0'){
-			point.x = strtod(strpos, &strpos);
+			Point* point = new Point;
+			point->x = strtod(strpos, &strpos);
 			++strpos;
-			point.y = strtod(strpos, &strpos);
+			point->y = strtod(strpos, &strpos);
 			++strpos;
-			if (map->maxX < point.x)
-				map->maxX = point.x;
-			else if (map->minX > point.x)
-				map->minX = point.x;
-			if (map->maxY < point.y)
-				map->maxY = point.y;
-			else if (map->minY > point.y)
-				map->minY = point.y;
-			point.pointInd = line->points.size();
-			point.lineInd = map->lines.size();
+			if (map->maxX < point->x)
+				map->maxX = point->x;
+			else if (map->minX > point->x)
+				map->minX = point->x;
+			if (map->maxY < point->y)
+				map->maxY = point->y;
+			else if (map->minY > point->y)
+				map->minY = point->y;
+			point->pointInd = line->points.size();
+			point->lineInd = map->lines.size();
 			line->points.push_back(point);
 			++line->kept;
 		}
@@ -54,6 +55,7 @@ LineSet* readLines(string filename)
 		pos1 = pos2 + 1;
 		pos2 = file.find('\n', pos1);
 	}
+	cout << "construct line cost: " << clock() - begin << endl;
 	return map;
 }
 
@@ -62,7 +64,6 @@ PointSet* readPoints(string filename)
 	PointSet* points = new PointSet;
 	ifstream fin(filename, std::ios::binary | std::ios::ate);
 	string filepoint;
-	Point point;
 	char* strpos;
 
 	vector<char> vfile(fin.tellg());
@@ -78,29 +79,30 @@ PointSet* readPoints(string filename)
 	points->maxX = points->minX = strtod(filepoint.c_str(), &strpos);
 	points->maxY = points->minY = strtod(++strpos, &strpos);
 
+	clock_t begin = clock();
 	while (pos2 != -1){
+		Point* point = new Point;
 		filepoint = file.substr(pos1, pos2 - pos1);
 		filepoint = filepoint.substr(filepoint.find_first_of('>') + 1);
 		filepoint = filepoint.substr(filepoint.find_first_of('>') + 1);
 		filepoint = filepoint.substr(0, filepoint.find_first_of('<'));
 
-		point.x = strtod(filepoint.c_str(), &strpos);
-		point.y = strtod(++strpos, NULL);
+		point->x = strtod(filepoint.c_str(), &strpos);
+		point->y = strtod(++strpos, NULL);
 
-		if (points->maxX < point.x)
-			points->maxX = point.x;
-		else if (points->minX > point.x)
-			points->minX = point.x;
-		if (points->maxY < point.y)
-			points->maxY = point.y;
-		else if (points->minY > point.y)
-			points->minY = point.y;
+		if (points->maxX < point->x)
+			points->maxX = point->x;
+		else if (points->minX > point->x)
+			points->minX = point->x;
+		if (points->maxY < point->y)
+			points->maxY = point->y;
+		else if (points->minY > point->y)
+			points->minY = point->y;
 
 		points->points.push_back(point);
 		pos1 = pos2 + 1;
 		pos2 = file.find('\n', pos1);
 	}
-
 	return points;
 }
 
@@ -113,8 +115,8 @@ void writeLines(LineSet* map, string filename)
 	for (int i = 0; i < map->lines.size(); ++i){
 		output << map->lines[i]->id << ':' << map->gmlLineString << map->gmlCoordinates;
 		for (int j = 0; j < map->lines[i]->points.size(); ++j){
-			if (map->lines[i]->points[j].kept)
-				output << map->lines[i]->points[j].x << ',' << map->lines[i]->points[j].y << ' ';
+			if (map->lines[i]->points[j]->kept)
+				output << map->lines[i]->points[j]->x << ',' << map->lines[i]->points[j]->y << ' ';
 		}
 		output << map->endCoordinates << map->endLineString << endl;
 	}

@@ -13,10 +13,10 @@ struct Point
 	int pointInd = -1;
 	Point(){}
 	Point(double X, double Y) :x(X), y(Y){}
-	bool operator==(const Point* point){ return x == point->x && y == point->y; }
-	bool operator==(const Point point){ return x == point.x && y == point.y; }
-	bool operator!=(const Point* point){ return x != point->x || y != point->y; }
-	bool operator!=(const Point point){ return x != point.x || y != point.y; }
+	bool operator==(const Point* point) const { return abs(x - point->x) < 0.001 && abs(y - point->y) < 0.001; }
+	bool operator!=(const Point* point) const { return abs(x - point->x) >= 0.001 || abs(y - point->y) >= 0.001; }
+	//bool operator==(const Point* point) const { return x == point->x && y == point->y; }
+	//bool operator!=(const Point* point) const { return x != point->x || y != point->y; }
 };
 
 struct PointSet
@@ -25,18 +25,22 @@ struct PointSet
 	const char* gmlCoordinates = "<gml:coordinates decimal=\".\" cs=\",\" ts=\" \">";
 	const char* endCoordinates = "</gml:coordinates>";
 	const char* endPoint = "</gml:Point>";
-	vector<Point> points;
+	vector<Point*> points;
 	double minX;
 	double maxX;
 	double minY;
 	double maxY;
+	~PointSet(){
+		for (int i = 0; i < points.size(); ++i)
+			delete points[i];
+	}
 };
 
 struct Line
 {
 	string id;
 	int kept = 0;
-	vector<Point> points;
+	vector<Point*> points;
 	vector<int>* shareEnd11 = new vector<int>();
 	vector<int>* shareEnd12 = new vector<int>();
 	vector<int>* shareEnd21 = new vector<int>();
@@ -49,6 +53,8 @@ struct Line
 		delete shareEnd21;
 		delete shareEnd22;
 		delete shareEnd;
+		for (int i = 0; i < points.size(); ++i)
+			delete points[i];
 	}
 };
 
@@ -80,7 +86,10 @@ struct LineSet
 			}
 		}
 	}
-	~LineSet(){ for (int i = 0; i < lines.size(); ++i) delete lines[i]; }
+	~LineSet(){
+		for (int i = 0; i < lines.size(); ++i)
+			delete lines[i];
+	}
 };
 
 struct Rect
@@ -90,9 +99,11 @@ struct Rect
 	double maxY;
 	double minY;
 	Rect(){}
-	Rect(double x1, double x2, double y1, double y2) :minX(x1), maxX(x2),
-		minY(y1), maxY(y2){}
-	bool isInside(double x, double y){ return x <= maxX && x > minX && y <= maxY && y > minY; }
+	Rect(double x1, double x2, double y1, double y2) :
+		minX(x1), maxX(x2), minY(y1), maxY(y2){}
+	bool isInside(double x, double y){ 
+		return x <= maxX && x > minX && y <= maxY && y > minY;
+	}
 };
 
 //can be faster
@@ -100,12 +111,18 @@ struct Triangle
 {
 	Point* p[3];
 	Triangle(){}
-	Triangle(Point* P1, Point* P2, Point* P3){ p[0] = P1; p[1] = P2; p[2] = P3; sortX(); sortY(); }
+	Triangle(Point* P1, Point* P2, Point* P3){
+		p[0] = P1;
+		p[1] = P2; 
+		p[2] = P3; 
+		sortX();
+		sortY();
+	}
 	double maxX;
 	double minX;
 	double maxY;
 	double minY;
-	inline void sortX(){
+	inline void sortX(){ //I know you can understand this
 		if (p[0]->x < p[1]->x){
 			if (p[0]->x < p[2]->x){
 				minX = p[0]->x;
@@ -133,7 +150,7 @@ struct Triangle
 			}
 		}
 	}
-	inline void sortY(){
+	inline void sortY(){ //so does this
 		if (p[0]->y < p[1]->y){
 			if (p[0]->y < p[2]->y){
 				minY = p[0]->y;
@@ -160,6 +177,13 @@ struct Triangle
 				maxY = p[0]->y;
 			}
 		}
+	}
+	inline bool isInTri(const double& x, const double& y) const {
+		double prod1 = (x - p[1]->x)*(p[0]->y - y) - (x - p[0]->x)*(p[1]->y - y);
+		double prod2 = (x - p[2]->x)*(p[0]->y - y) - (x - p[0]->x)*(p[2]->y - y);
+		double prod3 = (x - p[2]->x)*(p[1]->y - y) - (x - p[1]->x)*(p[2]->y - y);
+
+		return (prod1 > 0) != (prod2 > 0) && (prod2 > 0) != (prod3 > 0) && (prod1 != 0 || prod3 != 0);
 	}
 };
 
