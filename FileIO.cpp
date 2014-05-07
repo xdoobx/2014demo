@@ -109,7 +109,7 @@ PointSet* readPoints(string filename)
 void writeLines(LineSet* map, string filename)
 {
 	FILE * pFile;
-	fopen_s(&pFile, filename.c_str(), "w");
+	fopen_s(&pFile, filename.c_str(), "wb");
 	stringstream output;
 	output.precision(std::numeric_limits< double >::digits10);
 	for (int i = 0; i < map->lines.size(); ++i){
