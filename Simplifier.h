@@ -13,9 +13,8 @@ private:
 	inline bool removeP(Triangle &triangle, int index); //remove a point in the given triangle
 public:
 	Simplifier(char* lineFile, char* pointFile);
-	~Simplifier();
+	//~Simplifier();
 	void simplify(int limit); //main process!
-	LineSet* getMap()const{ return map; }
 	void wirteFile(string writeFile);
 };
 

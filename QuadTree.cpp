@@ -51,6 +51,7 @@ QuadTree::QuadTree(LineSet* map, int mark) :Index()
 
 QuadTree::QuadTree(LineSet* map, PointSet* points) :Index()
 {
+	clock_t begin = clock();
 	range = Rect(map->minX - 0.1, map->maxX + 0.1, map->minY - 0.1, map->maxY + 0.1);
 	size = 0;
 	point = NULL;
@@ -127,6 +128,7 @@ QuadTree::QuadTree(LineSet* map, PointSet* points) :Index()
 		}
 	}
 	map->getShare(); // find the lines sharing both endpoints
+	cout << "construct point index cost: " << clock() - begin << endl;
 }
 QuadTree::QuadTree(PointSet* points) :Index()
 {
@@ -141,14 +143,14 @@ QuadTree::QuadTree(PointSet* points) :Index()
 		insert(points->points[i]);
 }
 
-QuadTree::~QuadTree(){
-	if (subTree[0] != NULL){
-		delete subTree[0];
-		delete subTree[1];
-		delete subTree[2];
-		delete subTree[3];
-	}
-}
+//QuadTree::~QuadTree(){
+//	if (subtree[0] != null){
+//		delete subtree[0];
+//		delete subtree[1];
+//		delete subtree[2];
+//		delete subtree[3];
+//	}
+//}
 
 Point* QuadTree::insert(const Point* newPoint){
 	if (!isInside(newPoint))
@@ -247,13 +249,13 @@ bool QuadTree::remove(const Point* newPoint){
 					point = subTree[2]->point;
 				else if (subTree[3]->point != NULL)
 					point = subTree[3]->point;
-				delete subTree[0];
+				//delete subTree[0];
 				subTree[0] = NULL;
-				delete subTree[1];
+				//delete subTree[1];
 				subTree[1] = NULL;
-				delete subTree[2];
+				//delete subTree[2];
 				subTree[2] = NULL;
-				delete subTree[3];
+				//delete subTree[3];
 				subTree[3] = NULL;
 			}
 			return true;

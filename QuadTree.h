@@ -23,7 +23,7 @@ public:
 	QuadTree(LineSet* map, int mark); //construct qtree with endpoints in a map
 	QuadTree(LineSet* map, PointSet* points); //construct qtree with endpoints and constraint points
 	QuadTree(PointSet* points); //construct qtree with constraint points
-	~QuadTree();
+	//~QuadTree();
 	Point* insert(const Point* point);
 	inline bool isInside(const Point* point){ return range.isInside(point->x, point->y); }
 	inline bool hasPointInTri(const Triangle* triangle);

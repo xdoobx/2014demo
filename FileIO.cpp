@@ -6,33 +6,29 @@ LineSet* readLines(string filename)
 {
 	LineSet* map = new LineSet;
 	ifstream fin(filename, std::ios::binary | std::ios::ate);
-	string fileline;
 	char* strpos;
-	string id;
+	char* firstp;
+	long id;
 
 	vector<char> vfile(fin.tellg());
 	fin.seekg(0, ios::beg);
 	fin.read(vfile.data(), vfile.size());
-	string file(vfile.data());
-	int pos1 = 0, pos2 = file.find('\n');
+	vfile.push_back('\0');
+	strpos = vfile.data();
 
-	fileline = file.substr(pos1, pos2 - pos1);
-	id = fileline.substr(0, fileline.find_first_of(':'));
-	fileline = fileline.substr(120 + id.size());
-	fileline = fileline.substr(0, fileline.size() - 35);
-	map->maxX = map->minX = strtod(fileline.c_str(), &strpos);
-	map->maxY = map->minY = strtod(++strpos, &strpos);
+	strtol(strpos, &strpos, 10);
+	strpos += 120;
+	map->maxX = map->minX = strtod(strpos, &firstp);
+	map->maxY = map->minY = strtod(++firstp, NULL);
+	strpos = vfile.data();
 
 	clock_t begin = clock();
-	while (pos2 != -1){
-		fileline = file.substr(pos1, pos2 - pos1);
-		id = fileline.substr(0, fileline.find_first_of(':'));
-		fileline = fileline.substr(120 + id.size());
-		fileline = fileline.substr(0, fileline.size() - 35);
+	while (strpos[0] != '\0'){
+		id = strtol(strpos, &strpos, 10);
+		strpos += 120;
 		Line* line = new Line;
 		line->id = id;
-		strpos = (char*)fileline.c_str();
-		while (strpos[0] != '\0'){
+		while (strpos[0] != '<'){
 			Point* point = new Point;
 			point->x = strtod(strpos, &strpos);
 			++strpos;
@@ -51,9 +47,8 @@ LineSet* readLines(string filename)
 			line->points.push_back(point);
 			++line->kept;
 		}
+		strpos += 36;
 		map->lines.push_back(line);
-		pos1 = pos2 + 1;
-		pos2 = file.find('\n', pos1);
 	}
 	cout << "construct line cost: " << clock() - begin << endl;
 	return map;
@@ -65,30 +60,30 @@ PointSet* readPoints(string filename)
 	ifstream fin(filename, std::ios::binary | std::ios::ate);
 	string filepoint;
 	char* strpos;
+	char* firstp;
 
 	vector<char> vfile(fin.tellg());
 	fin.seekg(0, ios::beg);
 	fin.read(vfile.data(), vfile.size());
-	string file(vfile.data());
-	int pos1 = 0, pos2 = file.find('\n');
+	vfile.push_back('\0');
+	strpos = vfile.data();
 
-	filepoint = file.substr(pos1, pos2 - pos1);
-	filepoint = filepoint.substr(filepoint.find_first_of('>') + 1);
-	filepoint = filepoint.substr(filepoint.find_first_of('>') + 1);
-	filepoint = filepoint.substr(0, filepoint.find_first_of('<'));
-	points->maxX = points->minX = strtod(filepoint.c_str(), &strpos);
-	points->maxY = points->minY = strtod(++strpos, &strpos);
+	strtol(strpos, &strpos, 10);
+	strpos += 115;
+	points->maxX = points->minX = strtod(strpos, &firstp);
+	points->maxY = points->minY = strtod(++firstp, NULL);
+	strpos = vfile.data();
 
 	clock_t begin = clock();
-	while (pos2 != -1){
+	while (strpos[0] != '\0'){
 		Point* point = new Point;
-		filepoint = file.substr(pos1, pos2 - pos1);
-		filepoint = filepoint.substr(filepoint.find_first_of('>') + 1);
-		filepoint = filepoint.substr(filepoint.find_first_of('>') + 1);
-		filepoint = filepoint.substr(0, filepoint.find_first_of('<'));
+		strtol(strpos, &strpos, 10);
+		strpos += 115;
 
-		point->x = strtod(filepoint.c_str(), &strpos);
-		point->y = strtod(++strpos, NULL);
+		point->x = strtod(strpos, &strpos);
+		++strpos;
+		point->y = strtod(strpos, &strpos);
+		++strpos;
 
 		if (points->maxX < point->x)
 			points->maxX = point->x;
@@ -99,12 +94,14 @@ PointSet* readPoints(string filename)
 		else if (points->minY > point->y)
 			points->minY = point->y;
 
+		strpos += 31;
 		points->points.push_back(point);
-		pos1 = pos2 + 1;
-		pos2 = file.find('\n', pos1);
 	}
+	cout << "construct points cost: " << clock() - begin << endl;
 	return points;
 }
+
+
 
 void writeLines(LineSet* map, string filename)
 {

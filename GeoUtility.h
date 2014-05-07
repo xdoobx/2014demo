@@ -30,15 +30,15 @@ struct PointSet
 	double maxX;
 	double minY;
 	double maxY;
-	~PointSet(){
-		for (int i = 0; i < points.size(); ++i)
+	/*~PointSet(){
+		for (unsigned int i = 0; i < points.size(); ++i)
 			delete points[i];
-	}
+	}*/
 };
 
 struct Line
 {
-	string id;
+	long id;
 	int kept = 0;
 	vector<Point*> points;
 	vector<int>* shareEnd11 = new vector<int>();
@@ -47,7 +47,7 @@ struct Line
 	vector<int>* shareEnd22 = new vector<int>();
 	vector<int>* shareEnd = new vector<int>();
 
-	~Line(){
+	/*~Line(){
 		delete shareEnd11;
 		delete shareEnd12;
 		delete shareEnd21;
@@ -55,7 +55,7 @@ struct Line
 		delete shareEnd;
 		for (int i = 0; i < points.size(); ++i)
 			delete points[i];
-	}
+	}*/
 };
 
 struct LineSet
@@ -86,10 +86,10 @@ struct LineSet
 			}
 		}
 	}
-	~LineSet(){
+	/*~LineSet(){
 		for (int i = 0; i < lines.size(); ++i)
 			delete lines[i];
-	}
+	}*/
 };
 
 struct Rect

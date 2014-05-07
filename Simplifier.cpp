@@ -17,13 +17,13 @@ Simplifier::Simplifier(char* lineFile, char* pointFile){
 	cout << "total constriant points: " << qTreePoint->size << endl;
 }
 
-Simplifier::~Simplifier(){
-	delete map;
-	delete points;
-	delete qTreeLine;
-	delete qTreePoint;
-	//delete qTreeEnd;
-}
+//Simplifier::~Simplifier(){
+//	delete map;
+//	delete points;
+//	delete qTreeLine;
+//	delete qTreePoint;
+//	//delete qTreeEnd;
+//}
 
 void Simplifier::wirteFile(string writeFile) {
 	clock_t begin = clock();
@@ -71,7 +71,7 @@ inline bool Simplifier::removeP(Triangle &triangle, int index){
 					break;
 				}
 			}
-			delete constraint;
+			//delete constraint;
 			if (success){
 				if (map->lines[triangle.p[index]->lineInd]->kept == 3){
 					for (int i = 0; i < map->lines[triangle.p[index]->lineInd]->shareEnd->size(); ++i){
