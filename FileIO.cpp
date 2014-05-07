@@ -8,7 +8,6 @@ LineSet* readLines(string filename)
 	ifstream fin(filename, std::ios::binary | std::ios::ate);
 	char* strpos;
 	char* firstp;
-	long id;
 
 	vector<char> vfile(fin.tellg());
 	fin.seekg(0, ios::beg);
@@ -16,18 +15,16 @@ LineSet* readLines(string filename)
 	vfile.push_back('\0');
 	strpos = vfile.data();
 
-	strtol(strpos, &strpos, 10);
-	strpos += 120;
-	map->maxX = map->minX = strtod(strpos, &firstp);
+	strtol(strpos, &firstp, 10);
+	firstp += 120;
+	map->maxX = map->minX = strtod(firstp, &firstp);
 	map->maxY = map->minY = strtod(++firstp, NULL);
-	strpos = vfile.data();
 
-	clock_t begin = clock();
+	//clock_t begin = clock();
 	while (strpos[0] != '\0'){
-		id = strtol(strpos, &strpos, 10);
-		strpos += 120;
 		Line* line = new Line;
-		line->id = id;
+		line->id = strtol(strpos, &strpos, 10);
+		strpos += 120;
 		while (strpos[0] != '<'){
 			Point* point = new Point;
 			point->x = strtod(strpos, &strpos);
@@ -50,7 +47,7 @@ LineSet* readLines(string filename)
 		strpos += 36;
 		map->lines.push_back(line);
 	}
-	cout << "construct line cost: " << clock() - begin << endl;
+	//cout << "construct line cost: " << clock() - begin << endl;
 	return map;
 }
 
@@ -68,13 +65,11 @@ PointSet* readPoints(string filename)
 	vfile.push_back('\0');
 	strpos = vfile.data();
 
-	strtol(strpos, &strpos, 10);
-	strpos += 115;
+	strtol(strpos, &firstp, 10);
+	firstp += 115;
 	points->maxX = points->minX = strtod(strpos, &firstp);
 	points->maxY = points->minY = strtod(++firstp, NULL);
-	strpos = vfile.data();
 
-	clock_t begin = clock();
 	while (strpos[0] != '\0'){
 		Point* point = new Point;
 		strtol(strpos, &strpos, 10);
@@ -97,7 +92,6 @@ PointSet* readPoints(string filename)
 		strpos += 31;
 		points->points.push_back(point);
 	}
-	cout << "construct points cost: " << clock() - begin << endl;
 	return points;
 }
 
@@ -110,14 +104,14 @@ void writeLines(LineSet* map, string filename)
 	stringstream output;
 	output.precision(std::numeric_limits< double >::digits10);
 	for (int i = 0; i < map->lines.size(); ++i){
-		output << map->lines[i]->id << ':' << map->gmlLineString << map->gmlCoordinates;
+		output << map->lines[i]->id << map->gmlLineString << map->gmlCoordinates;
 		for (int j = 0; j < map->lines[i]->points.size(); ++j){
 			if (map->lines[i]->points[j]->kept)
 				output << map->lines[i]->points[j]->x << ',' << map->lines[i]->points[j]->y << ' ';
 		}
 		output << map->endCoordinates << map->endLineString << endl;
 	}
-	string result = output.str();
+	string result(output.str());
 	fwrite(result.c_str(), sizeof(char), result.size(), pFile);
 	fclose(pFile);
 }

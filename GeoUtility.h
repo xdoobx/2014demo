@@ -13,18 +13,14 @@ struct Point
 	int pointInd = -1;
 	Point(){}
 	Point(double X, double Y) :x(X), y(Y){}
-	bool operator==(const Point* point) const { return abs(x - point->x) < 0.001 && abs(y - point->y) < 0.001; }
-	bool operator!=(const Point* point) const { return abs(x - point->x) >= 0.001 || abs(y - point->y) >= 0.001; }
-	//bool operator==(const Point* point) const { return x == point->x && y == point->y; }
-	//bool operator!=(const Point* point) const { return x != point->x || y != point->y; }
+	/*bool operator==(const Point* point) const { return abs(x - point->x) < 0.001 && abs(y - point->y) < 0.001; }
+	bool operator!=(const Point* point) const { return abs(x - point->x) >= 0.001 || abs(y - point->y) >= 0.001; }*/
+	inline bool operator==(const Point* point) const { return x == point->x && y == point->y; }
+	inline bool operator!=(const Point* point) const { return x != point->x || y != point->y; }
 };
 
 struct PointSet
 {
-	const char* gmlPoint = "<gml:Point srsName=\"EPSG:54004\" xmlns:gml=\"http://www.opengis.net/gml\">";
-	const char* gmlCoordinates = "<gml:coordinates decimal=\".\" cs=\",\" ts=\" \">";
-	const char* endCoordinates = "</gml:coordinates>";
-	const char* endPoint = "</gml:Point>";
 	vector<Point*> points;
 	double minX;
 	double maxX;
@@ -60,7 +56,7 @@ struct Line
 
 struct LineSet
 {
-	const char* gmlLineString = "<gml:LineString srsName=\"EPSG:54004\" xmlns:gml=\"http://www.opengis.net/gml\">";
+	const char* gmlLineString = ":<gml:LineString srsName=\"EPSG:54004\" xmlns:gml=\"http://www.opengis.net/gml\">";
 	const char* gmlCoordinates = "<gml:coordinates decimal=\".\" cs=\",\" ts=\" \">";
 	const char* endCoordinates = "</gml:coordinates>";
 	const char* endLineString = "</gml:LineString>";
@@ -101,12 +97,14 @@ struct Rect
 	Rect(){}
 	Rect(double x1, double x2, double y1, double y2) :
 		minX(x1), maxX(x2), minY(y1), maxY(y2){}
-	bool isInside(double x, double y){ 
+	inline bool isInside(double x, double y){ 
 		return x <= maxX && x > minX && y <= maxY && y > minY;
+	}
+	inline bool isInside(const Point* p){
+		return p->x <= maxX && p->x > minX && p->y <= maxY && p->y > minY;
 	}
 };
 
-//can be faster
 struct Triangle
 {
 	Point* p[3];

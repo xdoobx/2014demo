@@ -18,7 +18,7 @@ QuadTree::QuadTree(const double& minX, const double& maxX, const double& minY, c
 
 QuadTree::QuadTree(LineSet* map) :Index()
 {
-	clock_t begin = clock();
+	//clock_t begin = clock();
 	range = Rect(map->minX - 0.1, map->maxX + 0.1, map->minY - 0.1, map->maxY + 0.1);
 	size = 0;
 	point = NULL;
@@ -31,7 +31,7 @@ QuadTree::QuadTree(LineSet* map) :Index()
 			insert(map->lines[i]->points[j]);
 		}
 	}
-	cout << "construct line index cost: " << clock() - begin << endl;
+	//cout << "construct line index cost: " << clock() - begin << endl;
 }
 
 QuadTree::QuadTree(LineSet* map, int mark) :Index()
@@ -51,7 +51,6 @@ QuadTree::QuadTree(LineSet* map, int mark) :Index()
 
 QuadTree::QuadTree(LineSet* map, PointSet* points) :Index()
 {
-	clock_t begin = clock();
 	range = Rect(map->minX - 0.1, map->maxX + 0.1, map->minY - 0.1, map->maxY + 0.1);
 	size = 0;
 	point = NULL;
@@ -61,7 +60,7 @@ QuadTree::QuadTree(LineSet* map, PointSet* points) :Index()
 	subTree[3] = NULL;
 	for (int i = 0; i < points->points.size(); ++i)
 		insert(points->points[i]);
-	Point* temp;
+	const Point* temp;
 	vector<int>* dup1, *dup2;
 	for (int i = 0; i < map->lines.size(); ++i){ // find lines sharing endpoints
 		temp = insert(map->lines[i]->points[0]); //try to insert head point
@@ -128,7 +127,6 @@ QuadTree::QuadTree(LineSet* map, PointSet* points) :Index()
 		}
 	}
 	map->getShare(); // find the lines sharing both endpoints
-	cout << "construct point index cost: " << clock() - begin << endl;
 }
 QuadTree::QuadTree(PointSet* points) :Index()
 {
@@ -151,56 +149,6 @@ QuadTree::QuadTree(PointSet* points) :Index()
 //		delete subtree[3];
 //	}
 //}
-
-Point* QuadTree::insert(const Point* newPoint){
-	if (!isInside(newPoint))
-		return NULL;
-	if (size == 0){
-		point = newPoint;
-		size = 1;
-		return (Point*)newPoint;
-	}
-	if (point != NULL && *point == newPoint){ //return the existing point if conflicts
-		return (Point*)point;
-	}
-	if (subTree[0] == NULL)
-		subDivid();
-	Point* p1 = subTree[0]->insert(newPoint);
-	Point* p2 = subTree[1]->insert(newPoint);
-	Point* p3 = subTree[2]->insert(newPoint);
-	Point* p4 = subTree[3]->insert(newPoint);
-	if (p1 == newPoint || p2 == newPoint ||
-		p3 == newPoint || p4 == newPoint){ //insert successfully
-		++size;
-		return (Point*)newPoint;
-	}
-	else if (p1 != NULL) //return the existing point out
-		return p1;
-	else if (p2 != NULL)
-		return p2;
-	else if (p3 != NULL)
-		return p3;
-	else if (p4 != NULL)
-		return p4;
-	return NULL;
-}
-
-bool QuadTree::subDivid(){
-	if (subTree[0] != NULL || subTree[1] != NULL || subTree[2] != NULL || subTree[3] != NULL)
-		return false;
-	double halfW = (range.maxX - range.minX) / 2; //divide original area into 4
-	double halfH = (range.maxY - range.minY) / 2;
-	subTree[0] = new QuadTree(range.minX, range.minX + halfW, range.minY, range.minY + halfH);
-	subTree[1] = new QuadTree(range.minX, range.minX + halfW, range.minY + halfH, range.maxY);
-	subTree[2] = new QuadTree(range.minX + halfW, range.maxX, range.minY + halfH, range.maxY);
-	subTree[3] = new QuadTree(range.minX + halfW, range.maxX, range.minY, range.minY + halfH);
-	if (subTree[0]->insert(point) || subTree[1]->insert(point) ||
-		subTree[2]->insert(point) || subTree[3]->insert(point)){
-		point = NULL; //put point into lower layer, empty itself
-		return true;
-	}
-	return false;
-}
 
 inline bool QuadTree::isCross(const Point* p1, const Point* p2,
 	const double& p3x, const double& p3y, const double& p4x, const double& p4y){
@@ -232,8 +180,66 @@ inline bool QuadTree::isIntersect(const Triangle* triangle){ //triangle * rectan
 		isCross(triangle->p[2], triangle->p[1], range.minX, range.maxY, range.minX, range.minY);
 }
 
-bool QuadTree::remove(const Point* newPoint){
-	if (!isInside(newPoint) || size == 0) //out of range
+inline const Point* QuadTree::insert (const Point* newPoint){
+	if (!range.isInside(newPoint))
+		return NULL;
+	if (size == 0){
+		point = newPoint;
+		size = 1;
+		return (Point*)newPoint;
+	}
+	if (point != NULL && *point == newPoint){ //return the existing point if conflicts
+		return (Point*)point;
+	}
+	if (subTree[0] == NULL)
+		subDivid();
+	const Point* p = subTree[0]->insert(newPoint);
+	if (p == newPoint){
+		++size;
+		return newPoint;
+	}
+	else if (p != NULL)
+		return p;
+	else if ((p = subTree[1]->insert(newPoint)) == newPoint){
+		++size;
+		return newPoint;
+	}
+	else if (p != NULL)
+		return p;
+	else if ((p = subTree[2]->insert(newPoint)) == newPoint){
+		++size;
+		return newPoint;
+	}
+	else if (p != NULL)
+		return p;
+	else if ((p = subTree[3]->insert(newPoint)) == newPoint){
+		++size;
+		return newPoint;
+	}
+	else if (p != NULL)
+		return p;
+	return NULL;
+}
+
+inline bool QuadTree::subDivid(){
+	if (subTree[0] != NULL || subTree[1] != NULL || subTree[2] != NULL || subTree[3] != NULL)
+		return false;
+	double halfW = (range.maxX - range.minX) / 2; //divide original area into 4
+	double halfH = (range.maxY - range.minY) / 2;
+	subTree[0] = new QuadTree(range.minX, range.minX + halfW, range.minY, range.minY + halfH);
+	subTree[1] = new QuadTree(range.minX, range.minX + halfW, range.minY + halfH, range.maxY);
+	subTree[2] = new QuadTree(range.minX + halfW, range.maxX, range.minY + halfH, range.maxY);
+	subTree[3] = new QuadTree(range.minX + halfW, range.maxX, range.minY, range.minY + halfH);
+	if (subTree[0]->insert(point) || subTree[1]->insert(point) ||
+		subTree[2]->insert(point) || subTree[3]->insert(point)){
+		point = NULL; //put point into lower layer, empty itself
+		return true;
+	}
+	return false;
+}
+
+inline bool QuadTree::remove(const Point* newPoint){
+	if (!range.isInside(newPoint) || size == 0) //out of range
 		return false;
 
 	if (subTree[0] != NULL){ //have children
@@ -277,8 +283,8 @@ inline bool QuadTree::hasPointInTri(const Triangle* triangle){
 	else if (triangle->maxX < range.minX || triangle->minX > range.maxX ||
 		triangle->maxY < range.minY || triangle->minY > range.maxY) // out of range
 		return false;
-	else if(!isInside(triangle->p[0]) && !isInside(triangle->p[1]) && !isInside(triangle->p[2]) && // triangle point in rec
-		!triangle->isInTri(range.maxX, range.maxY) && !triangle->isInTri(range.minX, range.minY) &&
+	else if(!range.isInside(triangle->p[0]) && !range.isInside(triangle->p[1]) && !range.isInside(triangle->p[2]) && 
+		!triangle->isInTri(range.maxX, range.maxY) && !triangle->isInTri(range.minX, range.minY) && // triangle point in rec
 		!triangle->isInTri(range.maxX, range.minY) && !triangle->isInTri(range.minX, range.maxY) && // rec point in triangle
 		!isIntersect(triangle)) //outside each other
 		return false;
@@ -288,7 +294,7 @@ inline bool QuadTree::hasPointInTri(const Triangle* triangle){
 	}
 }
 
-void QuadTree::pointInTri(const Triangle* triangle, vector<Point*>* v){
+inline void QuadTree::pointInTri(const Triangle* triangle, vector<Point*>* v){
 	if (size == 0)
 		return;
 	else if (size == 1){
@@ -299,8 +305,8 @@ void QuadTree::pointInTri(const Triangle* triangle, vector<Point*>* v){
 	else if (triangle->maxX < range.minX || triangle->minX > range.maxX ||
 		triangle->maxY < range.minY || triangle->minY > range.maxY) // out of range
 		return;
-	else if(!isInside(triangle->p[0]) && !isInside(triangle->p[1]) && !isInside(triangle->p[2]) && // triangle point in rec
-		!triangle->isInTri(range.maxX, range.maxY) && !triangle->isInTri(range.minX, range.minY) &&
+	else if (!range.isInside(triangle->p[0]) && !range.isInside(triangle->p[1]) && !range.isInside(triangle->p[2]) &&
+		!triangle->isInTri(range.maxX, range.maxY) && !triangle->isInTri(range.minX, range.minY) && // triangle point in rec
 		!triangle->isInTri(range.maxX, range.minY) && !triangle->isInTri(range.minX, range.maxY) && // rec point in triangle
 		!isIntersect(triangle)){ //their segments do not intersect
 		return;

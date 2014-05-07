@@ -3,7 +3,7 @@
 #include "Simplifier.h"
 
 Simplifier::Simplifier(char* lineFile, char* pointFile){
-	clock_t begin = clock(), end;
+	//clock_t begin = clock(), end;
 	LineSet* Map = readLines(lineFile);
 	PointSet* Points = readPoints(pointFile);
 	qTreeLine = new QuadTree(Map);
@@ -11,10 +11,10 @@ Simplifier::Simplifier(char* lineFile, char* pointFile){
 	map = Map;
 	points = Points;
 	orig_size = qTreeLine->size;
-	end = clock();
-	cout << "construction: " << end - begin << endl;
-	cout << "total line points: " << qTreeLine->size<< endl;
-	cout << "total constriant points: " << qTreePoint->size << endl;
+//	end = clock();
+//	cout << "construction: " << end - begin << endl;
+//	cout << "total line points: " << qTreeLine->size<< endl;
+//	cout << "total constriant points: " << qTreePoint->size << endl;
 }
 
 //Simplifier::~Simplifier(){
@@ -26,9 +26,9 @@ Simplifier::Simplifier(char* lineFile, char* pointFile){
 //}
 
 void Simplifier::wirteFile(string writeFile) {
-	clock_t begin = clock();
+	//clock_t begin = clock();
 	writeLines(map, writeFile);
-	cout << "write into file: " << clock() - begin << endl;
+	//cout << "write into file: " << clock() - begin << endl;
 }
 
 inline bool Simplifier::removeP(Triangle &triangle, int index){
@@ -96,9 +96,9 @@ void Simplifier::simplify(int limit){
 	int next;
 	int last;
 	int removed = 1, total_removed = 0;
-	clock_t begin, end;
+	//clock_t begin, end;
 	while(total_removed < limit && removed != 0){ //repeat the process if more points need to be removed
-		begin = clock();
+		//begin = clock();
 		for (int i = 0; i < map->lines.size(); ++i){ //for each line
 			triangle.p[0] = map->lines[i]->points[0];
 			next = 1;
@@ -134,10 +134,10 @@ void Simplifier::simplify(int limit){
 				}
 			}
 		}
-		end = clock();
+		//end = clock();
 		removed = orig_size - qTreeLine->size;
 		total_removed += removed;
 		orig_size = qTreeLine->size;
-		cout << "remove points: " << removed << "\ttime cost: " << end - begin << endl;
+		//cout << "remove points: " << removed << "\ttime cost: " << end - begin << endl;
 	}
 }

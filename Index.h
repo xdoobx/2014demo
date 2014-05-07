@@ -7,7 +7,7 @@ class Index{
 private:
 public:
 	Index(){}
-	virtual Point* insert(const Point* point) = 0;
+	virtual const Point* insert(const Point* point) = 0;
 	virtual bool hasPointInTri(const Triangle* triangle) = 0;
 	virtual void pointInTri(const Triangle* triangle, vector<Point*>* v) = 0;
 	virtual bool remove(const Point* point) = 0;

@@ -7,7 +7,7 @@
 class QuadTree: private Index
 {
 private:
-	bool subDivid();
+	inline bool subDivid();
 	inline bool isCross(const Point* p1, const Point* p2,
 		const double& p3x, const double& p3y, const double& p4x, const double& p4y);
 	inline bool isIntersect(const Triangle* triangle);
@@ -24,11 +24,10 @@ public:
 	QuadTree(LineSet* map, PointSet* points); //construct qtree with endpoints and constraint points
 	QuadTree(PointSet* points); //construct qtree with constraint points
 	//~QuadTree();
-	Point* insert(const Point* point);
-	inline bool isInside(const Point* point){ return range.isInside(point->x, point->y); }
+	inline const Point* insert (const Point* point);
 	inline bool hasPointInTri(const Triangle* triangle);
-	void pointInTri(const Triangle* triangle, vector<Point*>* record);
-	bool remove(const Point* point);
+	inline void pointInTri(const Triangle* triangle, vector<Point*>* record);
+	inline bool remove(const Point* point);
 };
 
 #endif
