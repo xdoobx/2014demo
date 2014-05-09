@@ -2,6 +2,29 @@
 #include "stdafx.h"
 #include "FileIO.h"
 
+double parseDouble(char* p, char** pos)
+{
+	int s = 1;
+
+	if (*p == '-') {
+		s = -1; p++;
+	}
+
+	double acc = 0;
+	while (*p >= '0' && *p <= '9')
+		acc = acc * 10 + *p++ - '0';
+
+	if (*p == '.') {
+		double k = 0.1;
+		p++;
+		while (*p >= '0' && *p <= '9') {
+			acc += (*p++ - '0') * k;
+			k *= 0.1;
+		}
+	}
+	*pos = p;
+	return s * acc;
+}
 LineSet* readLines(string filename)
 {
 	LineSet* map = new LineSet;
@@ -17,8 +40,8 @@ LineSet* readLines(string filename)
 
 	strtol(strpos, &firstp, 10);
 	firstp += 120;
-	map->maxX = map->minX = strtod(firstp, &firstp);
-	map->maxY = map->minY = strtod(++firstp, NULL);
+	map->maxX = map->minX = parseDouble(firstp, &firstp);
+	map->maxY = map->minY = parseDouble(++firstp, &firstp);
 
 	//clock_t begin = clock();
 	while (strpos[0] != '\0'){
@@ -27,9 +50,9 @@ LineSet* readLines(string filename)
 		strpos += 120;
 		while (strpos[0] != '<'){
 			Point* point = new Point;
-			point->x = strtod(strpos, &strpos);
+			point->x = parseDouble(strpos, &strpos);
 			++strpos;
-			point->y = strtod(strpos, &strpos);
+			point->y = parseDouble(strpos, &strpos);
 			++strpos;
 			if (map->maxX < point->x)
 				map->maxX = point->x;
@@ -67,17 +90,17 @@ PointSet* readPoints(string filename)
 
 	strtol(strpos, &firstp, 10);
 	firstp += 115;
-	points->maxX = points->minX = strtod(strpos, &firstp);
-	points->maxY = points->minY = strtod(++firstp, NULL);
+	points->maxX = points->minX = parseDouble(strpos, &firstp);
+	points->maxY = points->minY = parseDouble(++firstp, &firstp);
 
 	while (strpos[0] != '\0'){
 		Point* point = new Point;
 		strtol(strpos, &strpos, 10);
 		strpos += 115;
 
-		point->x = strtod(strpos, &strpos);
+		point->x = parseDouble(strpos, &strpos);
 		++strpos;
-		point->y = strtod(strpos, &strpos);
+		point->y = parseDouble(strpos, &strpos);
 		++strpos;
 
 		if (points->maxX < point->x)
@@ -95,14 +118,62 @@ PointSet* readPoints(string filename)
 	return points;
 }
 
+int combine(char* output, int pos, long id){
+	int p = 1e4;
+	int digit;
+	while (id / p < 1)
+		p /= 10;
+	while (p > 0){
+		digit = id / p;
+		output[pos++] = char(digit + '0');
+		id -= digit * p;
+		p /= 10;
+	}
+	return pos;
+}
 
+int combine(char* output, int pos, double number, char sep){
+	double p = 1e8;
+	int digit;
+	if (number < 0){
+		output[pos++] = '-';
+		number *= -1;
+	}
+	else if (number == 0){
+		output[pos++] = '0';
+		output[pos++] = sep;
+		return pos;
+	}
+	while (number / p < 1)
+		p /= 10;
+	while (p >= 1){
+		digit = (int)(number / p);
+		output[pos++] = char(digit + '0');
+		number -= p * digit;
+		p /= 10;
+	}
+	output[pos++] = '.';
+	while (p >= 0.0001){
+		digit = (int)(number / p);
+		output[pos++] = char(digit + '0');
+		number -= p * digit;
+		p /= 10;
+	}
+	output[pos++] = sep;
+	return pos;
+}
+int combine(char* output, int pos, const char* str, int length){
+	for (int i = 0; i < length; ++i)
+		output[pos + i] = str[i];
+	return pos + length;
+}
 
-void writeLines(LineSet* map, string filename)
+void writeLines(LineSet* map, string filename, int length)
 {
 	FILE * pFile;
 	fopen_s(&pFile, filename.c_str(), "wb");
-	stringstream output;
-	output.precision(std::numeric_limits< double >::digits10);
+	/*stringstream output;
+	output.precision(std::numeric_limits< double >::digits10 - 4);
 	for (int i = 0; i < map->lines.size(); ++i){
 		output << map->lines[i]->id << map->gmlLineString << map->gmlCoordinates;
 		for (int j = 0; j < map->lines[i]->points.size(); ++j){
@@ -112,6 +183,24 @@ void writeLines(LineSet* map, string filename)
 		output << map->endCoordinates << map->endLineString << endl;
 	}
 	string result(output.str());
-	fwrite(result.c_str(), sizeof(char), result.size(), pFile);
+	fwrite(result.c_str(), sizeof(char), result.size(), pFile);*/
+	char* output = new char[length];
+	int pos = 0;
+	for (int i = 0; i < map->lines.size(); ++i){
+		pos = combine(output, pos, map->lines[i]->id);
+		pos = combine(output, pos, map->gmlLineString, 77);
+		pos = combine(output, pos, map->gmlCoordinates, 43);
+		for (int j = 0; j < map->lines[i]->points.size(); ++j){
+			if (map->lines[i]->points[j]->kept){
+				pos = combine(output, pos, map->lines[i]->points[j]->x, ',');
+				pos = combine(output, pos, map->lines[i]->points[j]->y, ' ');
+			}
+		}
+		pos = combine(output, pos, map->endCoordinates, 18);
+		pos = combine(output, pos, map->endLineString, 17);
+		output[pos++] = '\n';
+	}
+	//output[pos - 1] = '\0';
+	fwrite(output, sizeof(char), pos, pFile);
 	fclose(pFile);
 }

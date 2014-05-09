@@ -14,9 +14,10 @@ int _tmain(int argc, char* argv[])
 	end = clock();
 	cout <<"construct: "<< end - begin << endl;
 	begin = end;
-	simp.simplify(atoi(argv[1]));
+	simp.simplifyMT(atoi(argv[1]));
+	//simp.simplify(atoi(argv[1]));
 	end = clock();
-	cout <<"Simplify: " << end - begin << endl;
+	cout << "Simplify: " << end - begin << endl;
 	begin = end;
 	simp.wirteFile((char*)argv[4]);
 	end = clock();

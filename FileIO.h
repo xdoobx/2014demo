@@ -11,6 +11,6 @@
 
 extern LineSet* readLines(string filename);
 extern PointSet* readPoints(string filename);
-extern void writeLines(LineSet* map, string filename);
+extern void writeLines(LineSet* map, string filename, int length);
 
 #endif

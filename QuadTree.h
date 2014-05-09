@@ -14,7 +14,7 @@ private:
 public:
 	Rect range;
 	int size;
-	const Point* point;
+	Point* point;
 
 	QuadTree* subTree[4];
 
@@ -24,7 +24,7 @@ public:
 	QuadTree(LineSet* map, PointSet* points); //construct qtree with endpoints and constraint points
 	QuadTree(PointSet* points); //construct qtree with constraint points
 	//~QuadTree();
-	inline const Point* insert (const Point* point);
+	inline const Point* insert (Point* point);
 	inline bool hasPointInTri(const Triangle* triangle);
 	inline void pointInTri(const Triangle* triangle, vector<Point*>* record);
 	inline bool remove(const Point* point);

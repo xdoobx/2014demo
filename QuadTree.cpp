@@ -166,7 +166,8 @@ inline bool QuadTree::isCross(const Point* p1, const Point* p2,
 }
 
 inline bool QuadTree::isIntersect(const Triangle* triangle){ //triangle * rectangle = 12
-	return isCross(triangle->p[0], triangle->p[1], range.minX, range.minY, range.maxX, range.minY) ||
+	return
+		isCross(triangle->p[0], triangle->p[1], range.minX, range.minY, range.maxX, range.minY) ||
 		isCross(triangle->p[0], triangle->p[2], range.minX, range.minY, range.maxX, range.minY) ||
 		isCross(triangle->p[2], triangle->p[1], range.minX, range.minY, range.maxX, range.minY) ||
 		isCross(triangle->p[0], triangle->p[1], range.maxX, range.minY, range.maxX, range.maxY) ||
@@ -180,19 +181,20 @@ inline bool QuadTree::isIntersect(const Triangle* triangle){ //triangle * rectan
 		isCross(triangle->p[2], triangle->p[1], range.minX, range.maxY, range.minX, range.minY);
 }
 
-inline const Point* QuadTree::insert (const Point* newPoint){
+inline const Point* QuadTree::insert (Point* newPoint){
 	if (!range.isInside(newPoint))
 		return NULL;
 	if (size == 0){
 		point = newPoint;
 		size = 1;
-		return (Point*)newPoint;
+		return newPoint;
 	}
 	if (point != NULL && *point == newPoint){ //return the existing point if conflicts
-		return (Point*)point;
+		return point;
 	}
 	if (subTree[0] == NULL)
 		subDivid();
+
 	const Point* p = subTree[0]->insert(newPoint);
 	if (p == newPoint){
 		++size;
@@ -299,7 +301,7 @@ inline void QuadTree::pointInTri(const Triangle* triangle, vector<Point*>* v){
 		return;
 	else if (size == 1){
 		if (point->kept && triangle->isInTri(point->x, point->y))
-			v->push_back((Point*)point);
+			v->push_back(point);
 		return;
 	}
 	else if (triangle->maxX < range.minX || triangle->minX > range.maxX ||
