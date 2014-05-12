@@ -128,6 +128,7 @@ QuadTree::QuadTree(LineSet* map, PointSet* points) :Index()
 	}
 	map->getShare(); // find the lines sharing both endpoints
 }
+
 QuadTree::QuadTree(PointSet* points) :Index()
 {
 	range = Rect(points->minX - 0.1, points->maxX + 0.1, points->minY - 0.1, points->maxY + 0.1);
@@ -195,47 +196,125 @@ inline const Point* QuadTree::insert (Point* newPoint){
 	if (subTree[0] == NULL)
 		subDivid();
 
-	const Point* p = subTree[0]->insert(newPoint);
-	if (p == newPoint){
-		++size;
-		return newPoint;
+	const Point* p;
+	double halfW = subTree[0]->range.maxX;
+	double halfH = subTree[0]->range.maxY;
+	if (newPoint->x <= halfW){
+		if (newPoint->y <= halfH){
+			if ((p = subTree[0]->insert(newPoint)) == newPoint){
+				++size;
+				return newPoint;
+			}
+			else if (p != NULL)
+				return p;
+		}
+		else{
+			if ((p = subTree[1]->insert(newPoint)) == newPoint){
+				++size;
+				return newPoint;
+			}
+			else if (p != NULL)
+				return p;
+		}
 	}
-	else if (p != NULL)
-		return p;
-	else if ((p = subTree[1]->insert(newPoint)) == newPoint){
-		++size;
-		return newPoint;
+	else{
+		if (newPoint->y <= halfH){
+			if ((p = subTree[3]->insert(newPoint)) == newPoint){
+				++size;
+				return newPoint;
+			}
+			else if (p != NULL)
+				return p;
+		}
+		else{
+			if ((p = subTree[2]->insert(newPoint)) == newPoint){
+				++size;
+				return newPoint;
+			}
+			else if (p != NULL)
+				return p;
+		}
 	}
-	else if (p != NULL)
-		return p;
-	else if ((p = subTree[2]->insert(newPoint)) == newPoint){
-		++size;
-		return newPoint;
-	}
-	else if (p != NULL)
-		return p;
-	else if ((p = subTree[3]->insert(newPoint)) == newPoint){
-		++size;
-		return newPoint;
-	}
-	else if (p != NULL)
-		return p;
 	return NULL;
 }
 
+/*iteration version insert is VERY SLOW*/
+//inline const Point* QuadTree::insert(Point* newPoint){
+//	stack<QuadTree*> stk;
+//	QuadTree* cur = this;
+//	stk.push(cur);
+//	while (1){
+//		while (cur->subTree[0] != NULL){
+//			if (cur->subTree[0]->range.isInside(newPoint))
+//				cur = cur->subTree[0];
+//			else if (cur->subTree[1]->range.isInside(newPoint))
+//				cur = cur->subTree[1];
+//			else if (cur->subTree[2]->range.isInside(newPoint))
+//				cur = cur->subTree[2];
+//			else if (cur->subTree[3]->range.isInside(newPoint))
+//				cur = cur->subTree[3];
+//			else
+//				return NULL;
+//			stk.push(cur);
+//		}
+//		if (cur->point != NULL){
+//			if (*cur->point == newPoint)
+//				return cur->point;
+//			else{
+//				cur->subDivid();
+//			}
+//		}
+//		else{
+//			cur->point = newPoint;
+//			while (!stk.empty()){
+//				++stk.top()->size;
+//				//cout << stk.size() << endl;
+//				stk.pop();
+//			}
+//			return newPoint;
+//		}
+//	}
+//}
+
 inline bool QuadTree::subDivid(){
-	if (subTree[0] != NULL || subTree[1] != NULL || subTree[2] != NULL || subTree[3] != NULL)
-		return false;
-	double halfW = (range.maxX - range.minX) / 2; //divide original area into 4
-	double halfH = (range.maxY - range.minY) / 2;
-	subTree[0] = new QuadTree(range.minX, range.minX + halfW, range.minY, range.minY + halfH);
-	subTree[1] = new QuadTree(range.minX, range.minX + halfW, range.minY + halfH, range.maxY);
-	subTree[2] = new QuadTree(range.minX + halfW, range.maxX, range.minY + halfH, range.maxY);
-	subTree[3] = new QuadTree(range.minX + halfW, range.maxX, range.minY, range.minY + halfH);
-	if (subTree[0]->insert(point) || subTree[1]->insert(point) ||
-		subTree[2]->insert(point) || subTree[3]->insert(point)){
-		point = NULL; //put point into lower layer, empty itself
-		return true;
+	double halfW = range.minX + (range.maxX - range.minX) / 2; //divide original area into 4
+	double halfH = range.minY + (range.maxY - range.minY) / 2;
+	subTree[0] = new QuadTree(range.minX, halfW, range.minY, halfH);
+	subTree[1] = new QuadTree(range.minX, halfW, halfH, range.maxY);
+	subTree[2] = new QuadTree(halfW, range.maxX, halfH, range.maxY);
+	subTree[3] = new QuadTree(halfW, range.maxX, range.minY, halfH);
+	//if (subTree[0]->insert(point) || subTree[1]->insert(point) ||
+	//	subTree[2]->insert(point) || subTree[3]->insert(point)){
+	//	point = NULL; //put point into lower layer, empty itself
+	//	return true;
+	//}
+	if (point->x <= halfW){
+		if (point->y <= halfH){
+			subTree[0]->point = point;
+			subTree[0]->size = 1;
+			point = NULL;
+			return true;
+		}
+		else{
+			subTree[1]->point = point;
+			subTree[1]->size = 1;
+			point = NULL;
+			return true;
+		}
+	}
+	else{
+		if (point->y <= halfH){
+			subTree[3]->point = point;
+			subTree[3]->size = 1;
+			point = NULL;
+			return true;
+		}
+		else{
+			subTree[2]->point = point;
+			subTree[2]->size = 1;
+			point = NULL;
+			return true;
+		}
 	}
 	return false;
 }
@@ -245,9 +324,35 @@ inline bool QuadTree::remove(const Point* newPoint){
 		return false;
 
 	if (subTree[0] != NULL){ //have children
-		if (subTree[0]->remove(newPoint) || subTree[1]->remove(newPoint) ||
-			subTree[2]->remove(newPoint) || subTree[3]->remove(newPoint)){
-			--size; //remove successfully
+		double halfW = subTree[0]->range.maxX;
+		double halfH = subTree[0]->range.maxY;
+		bool removed = false;
+		if (newPoint->x <= halfW){
+			if (newPoint->y <= halfH){
+				if (subTree[0]->remove(newPoint)){
+					--size;
+					removed = true;
+				}
+			}
+			else if (subTree[1]->remove(newPoint)){
+				--size;
+				removed = true;
+			}
+		}
+		else{
+			if (newPoint->y <= halfH){
+				if (subTree[3]->remove(newPoint)){
+					--size;
+					removed = true;
+				}
+			}
+			else if (subTree[2]->remove(newPoint)){
+				--size;
+				removed = true;
+			}
+		}
+		if (removed){
+			//remove successfully
 			if (size == 1){ //need to recycle empty branches
 				if (subTree[0]->point != NULL)
 					point = subTree[0]->point;

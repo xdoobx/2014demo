@@ -13,10 +13,10 @@ struct Point
 	int pointInd = -1;
 	Point(){}
 	Point(double X, double Y) :x(X), y(Y){}
-	/*bool operator==(const Point* point) const { return abs(x - point->x) < 0.001 && abs(y - point->y) < 0.001; }
-	bool operator!=(const Point* point) const { return abs(x - point->x) >= 0.001 || abs(y - point->y) >= 0.001; }*/
-	inline bool operator==(const Point* point) const { return x == point->x && y == point->y; }
-	inline bool operator!=(const Point* point) const { return x != point->x || y != point->y; }
+	inline bool operator==(const Point* point) const { return abs(x - point->x) < 0.001 && abs(y - point->y) < 0.001; }
+	inline bool operator!=(const Point* point) const { return abs(x - point->x) >= 0.001 || abs(y - point->y) >= 0.001; }
+	/*inline bool operator==(const Point* point) const { return x == point->x && y == point->y; }
+	inline bool operator!=(const Point* point) const { return x != point->x || y != point->y; }*/
 };
 
 struct PointSet
@@ -36,6 +36,7 @@ struct Line
 {
 	long id;
 	int kept = 0;
+	bool cycle;
 	vector<Point*> points;
 	vector<int>* shareEnd11 = new vector<int>();
 	vector<int>* shareEnd12 = new vector<int>();
@@ -120,7 +121,7 @@ struct Triangle
 	double minX;
 	double maxY;
 	double minY;
-	inline void sortX(){ //I know you can understand this
+	inline void sortX(){ //get x range of this triangle
 		if (p[0]->x < p[1]->x){
 			if (p[0]->x < p[2]->x){
 				minX = p[0]->x;
@@ -148,7 +149,7 @@ struct Triangle
 			}
 		}
 	}
-	inline void sortY(){ //so does this
+	inline void sortY(){ //get y range
 		if (p[0]->y < p[1]->y){
 			if (p[0]->y < p[2]->y){
 				minY = p[0]->y;
@@ -179,9 +180,19 @@ struct Triangle
 	inline bool isInTri(const double& x, const double& y) const {
 		double prod1 = (x - p[1]->x)*(p[0]->y - y) - (x - p[0]->x)*(p[1]->y - y);
 		double prod2 = (x - p[2]->x)*(p[0]->y - y) - (x - p[0]->x)*(p[2]->y - y);
-		double prod3 = (x - p[2]->x)*(p[1]->y - y) - (x - p[1]->x)*(p[2]->y - y);
-
-		return (prod1 > 0) != (prod2 > 0) && (prod2 > 0) != (prod3 > 0) && (prod1 != 0 || prod3 != 0);
+		if (prod1 > 0 == prod2 > 0)
+			if((prod1 != 0) == (prod2 != 0))
+				return false;
+			else{
+				if ((x - p[2]->x)*(p[1]->y - y) == (x - p[1]->x)*(p[2]->y - y))
+					return false;
+				else
+					return true;
+			}
+		else{
+			double prod3 = (x - p[2]->x)*(p[1]->y - y) - (x - p[1]->x)*(p[2]->y - y);
+			return prod2 > 0 ^ prod3 > 0 && (prod1 != 0 || prod3 != 0); // XOR used as !=
+		}
 	}
 };
 

@@ -85,6 +85,7 @@
     <ClInclude Include="Index.h" />
     <ClInclude Include="QuadTree.h" />
     <ClInclude Include="Simplifier.h" />
+    <ClInclude Include="SortIndex.h" />
     <ClInclude Include="stdafx.h" />
     <ClInclude Include="targetver.h" />
   </ItemGroup>
@@ -93,6 +94,7 @@
     <ClCompile Include="QuadTree.cpp" />
     <ClCompile Include="Simplifier.cpp" />
     <ClCompile Include="Simplify.cpp" />
+    <ClCompile Include="SortIndex.cpp" />
     <ClCompile Include="stdafx.cpp">
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">Create</PrecompiledHeader>
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">Create</PrecompiledHeader>

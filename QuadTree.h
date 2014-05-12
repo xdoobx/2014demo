@@ -3,6 +3,7 @@
 
 #include "Index.h"
 #include "FileIO.h"
+#include <stack>
 
 class QuadTree: private Index
 {
@@ -14,6 +15,7 @@ private:
 public:
 	Rect range;
 	int size;
+	//bool empty;
 	Point* point;
 
 	QuadTree* subTree[4];
