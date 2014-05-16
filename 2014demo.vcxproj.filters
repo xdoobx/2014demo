@@ -39,9 +39,6 @@
     <ClInclude Include="FileIO.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="SortIndex.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="stdafx.cpp">
@@ -57,9 +54,6 @@
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="FileIO.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="SortIndex.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
   </ItemGroup>
