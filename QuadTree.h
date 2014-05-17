@@ -12,6 +12,7 @@ private:
 	inline bool isCross(const Point* p1, const Point* p2,
 		const double& p3x, const double& p3y, const double& p4x, const double& p4y);
 	inline bool isIntersect(const Triangle* triangle);
+	inline const Point* insert (Point* point);
 public:
 	Rect range;
 	int size;
@@ -26,7 +27,6 @@ public:
 	QuadTree(LineSet* map, PointSet* points); //construct qtree with endpoints and constraint points
 	QuadTree(PointSet* points); //construct qtree with constraint points
 	//~QuadTree();
-	inline const Point* insert (Point* point);
 	inline bool hasPointInTri(const Triangle* triangle);
 	inline void pointInTri(const Triangle* triangle, vector<Point*>* record);
 	inline bool remove(const Point* point);
