@@ -11,6 +11,8 @@ struct Point
 	bool kept = true;
 	int lineInd = -1;
 	int pointInd = -1;
+	int leftInd = -1;
+	int rightInd = -1;
 	Point(){}
 	Point(double X, double Y) :x(X), y(Y){}
 	inline bool operator==(const Point* point) const { return abs(x - point->x) < 0.001 && abs(y - point->y) < 0.001; }

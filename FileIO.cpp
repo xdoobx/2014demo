@@ -74,6 +74,8 @@ LineSet* readLines(string filename)
 				map->minY = point->y;
 			point->pointInd = line->points.size();
 			point->lineInd = map->lines.size();
+			point->leftInd = line->points.size() - 1;
+			point->rightInd = line->points.size() + 1;
 			line->points.push_back(point);
 			++line->kept;
 		}
@@ -186,15 +188,16 @@ void writeLines(LineSet* map, string filename, int length)
 	fopen_s(&pFile, filename.c_str(), "wb");
 	char* output = new char[length];
 	int pos = 0;
+	int ind = 0;
 	for (int i = 0; i < map->lines.size(); ++i){
 		combine(output, pos, map->lines[i]->id);
 		combine(output, pos, map->gmlLineString, 77);
 		combine(output, pos, map->gmlCoordinates, 43);
-		for (int j = 0; j < map->lines[i]->points.size(); ++j){
-			if (map->lines[i]->points[j]->kept){
-				combine(output, pos, map->lines[i]->points[j]->x, ',');
-				combine(output, pos, map->lines[i]->points[j]->y, ' ');
-			}
+		ind = 0;
+		while(ind < map->lines[i]->points.size()){
+			combine(output, pos, map->lines[i]->points[ind]->x, ',');
+			combine(output, pos, map->lines[i]->points[ind]->y, ' ');
+			ind = map->lines[i]->points[ind]->rightInd;
 		}
 		combine(output, pos, map->endCoordinates, 18);
 		combine(output, pos, map->endLineString, 17);
