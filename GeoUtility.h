@@ -40,11 +40,11 @@ struct Line
 	int kept = 0;
 	bool cycle;
 	vector<Point*> points;
-	vector<int>* shareEnd11 = new vector<int>();
-	vector<int>* shareEnd12 = new vector<int>();
-	vector<int>* shareEnd21 = new vector<int>();
-	vector<int>* shareEnd22 = new vector<int>();
-	vector<int>* shareEnd = new vector<int>();
+	vector<int> shareEnd11;
+	vector<int> shareEnd12;
+	vector<int> shareEnd21;
+	vector<int> shareEnd22;
+	vector<int> shareEnd;
 
 	/*~Line(){
 		delete shareEnd11;
@@ -69,18 +69,18 @@ struct LineSet
 	double minY;
 	double maxY;
 
-	void getShare(){
+	void getShare(){ //scan sharing endpoint information, find 2-polyline-cycle
 		for (int i = 0; i < lines.size(); ++i){
-			for (int j = 0; j < lines[i]->shareEnd11->size(); ++j){
-				for (int k = 0; k < lines[i]->shareEnd22->size(); ++k){
-					if (lines[i]->shareEnd11->at(j) == lines[i]->shareEnd22->at(k))
-						lines[i]->shareEnd->push_back(lines[i]->shareEnd11->at(j));
+			for (int j = 0; j < lines[i]->shareEnd11.size(); ++j){
+				for (int k = 0; k < lines[i]->shareEnd22.size(); ++k){
+					if (lines[i]->shareEnd11[j] == lines[i]->shareEnd22[k])
+						lines[i]->shareEnd.push_back(lines[i]->shareEnd11[j]);
 				}
 			}
-			for (int j = 0; j < lines[i]->shareEnd12->size(); ++j){
-				for (int k = 0; k < lines[i]->shareEnd21->size(); ++k){
-					if (lines[i]->shareEnd12->at(j) == lines[i]->shareEnd21->at(k))
-						lines[i]->shareEnd->push_back(lines[i]->shareEnd12->at(j));
+			for (int j = 0; j < lines[i]->shareEnd12.size(); ++j){
+				for (int k = 0; k < lines[i]->shareEnd21.size(); ++k){
+					if (lines[i]->shareEnd12[j] == lines[i]->shareEnd21[k])
+						lines[i]->shareEnd.push_back(lines[i]->shareEnd12[j]);
 				}
 			}
 		}
@@ -116,14 +116,21 @@ struct Triangle
 		p[0] = P1;
 		p[1] = P2; 
 		p[2] = P3; 
-		sortX();
-		sortY();
+		sort();
 	}
 	double maxX;
 	double minX;
 	double maxY;
 	double minY;
-	inline void sortX(){ //get x range of this triangle
+	//only for VW
+	double area;
+	Triangle* pre;
+	Triangle* next;
+	int ind;
+	//end only for vw
+
+	//get x and y range of THIS triangle
+	inline void sort(){
 		if (p[0]->x < p[1]->x){
 			if (p[0]->x < p[2]->x){
 				minX = p[0]->x;
@@ -150,8 +157,6 @@ struct Triangle
 				maxX = p[0]->x;
 			}
 		}
-	}
-	inline void sortY(){ //get y range
 		if (p[0]->y < p[1]->y){
 			if (p[0]->y < p[2]->y){
 				minY = p[0]->y;
@@ -179,6 +184,11 @@ struct Triangle
 			}
 		}
 	}
+
+	inline void calArea(){
+		area = abs((p[2]->x - p[1]->x)*(p[0]->y - p[2]->y) - (p[2]->x - p[0]->x)*(p[1]->y - p[2]->y));
+	}
+	//whether a point is in this triangle
 	inline bool isInTri(const double& x, const double& y) const {
 		double prod1 = (x - p[1]->x)*(p[0]->y - y) - (x - p[0]->x)*(p[1]->y - y);
 		double prod2 = (x - p[2]->x)*(p[0]->y - y) - (x - p[0]->x)*(p[2]->y - y);

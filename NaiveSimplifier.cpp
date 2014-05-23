@@ -1,8 +1,8 @@
 
 #include "stdafx.h"
-#include "Simplifier.h"
+#include "NaiveSimplifier.h"
 
-Simplifier::Simplifier(char* lineFile, char* pointFile){
+NaiveSimplifier::NaiveSimplifier(char* lineFile, char* pointFile){
 	//clock_t begin = clock(), end;
 	LineSet* Map = readLines(lineFile);
 	PointSet* Points = readPoints(pointFile);
@@ -25,19 +25,19 @@ Simplifier::Simplifier(char* lineFile, char* pointFile){
 //	//delete qTreeEnd;
 //}
 
-void Simplifier::wirteFile(string writeFile) {
+void NaiveSimplifier::wirteFile(string writeFile) {
 	//clock_t begin = clock();
-	int length = map->lines.size() * 160 + (qTreeLine->size + 2 * map->lines.size()) * 38;
+	int length = map->lines.size() * 155 + (qTreeLine->size + 2 * map->lines.size()) * 38;
 	writeLines(map, writeFile, length);
 	//cout << "write into file: " << clock() - begin << endl;
 }
 
-inline bool Simplifier::removeP(Triangle &triangle){
+inline bool NaiveSimplifier::removeP(Triangle &triangle){
 	if (!qTreePoint->hasPointInTri(&triangle)){ //is there any city in this triangle?
 		if (!qTreeLine->hasPointInTri(&triangle)){ //is there any line-points in this triangle?
 			if (map->lines[triangle.p[1]->lineInd]->kept == 3){ //is it the last point on the line?
-				for (int i = 0; i < map->lines[triangle.p[1]->lineInd]->shareEnd->size(); ++i){
-					if (map->lines[map->lines[triangle.p[1]->lineInd]->shareEnd->at(i)]->kept == 2)
+				for (int i = 0; i < map->lines[triangle.p[1]->lineInd]->shareEnd.size(); ++i){
+					if (map->lines[map->lines[triangle.p[1]->lineInd]->shareEnd.at(i)]->kept == 2)
 						return false; //Oops, sharing both endpoints with a segment
 				}
 			}
@@ -59,8 +59,7 @@ inline bool Simplifier::removeP(Triangle &triangle){
 				tri.p[0] = map->lines[toRm->lineInd]->points[toRm->leftInd];
 				tri.p[1] = toRm;
 				tri.p[2] = map->lines[toRm->lineInd]->points[toRm->rightInd];
-				tri.sortX();
-				tri.sortY();
+				tri.sort();
 				if (!removeP(tri)){
 					success = false;
 					break;
@@ -69,8 +68,8 @@ inline bool Simplifier::removeP(Triangle &triangle){
 			//after delete constraint
 			if (success){
 				if (map->lines[triangle.p[1]->lineInd]->kept == 3){
-					for (int i = 0; i < map->lines[triangle.p[1]->lineInd]->shareEnd->size(); ++i){
-						if (map->lines[map->lines[triangle.p[1]->lineInd]->shareEnd->at(i)]->kept == 2)
+					for (int i = 0; i < map->lines[triangle.p[1]->lineInd]->shareEnd.size(); ++i){
+						if (map->lines[map->lines[triangle.p[1]->lineInd]->shareEnd[i]]->kept == 2)
 							return false;
 					}
 				}
@@ -86,12 +85,12 @@ inline bool Simplifier::removeP(Triangle &triangle){
 	return false;
 }
 
-inline bool Simplifier::removeS(Triangle& triangle){
+inline bool NaiveSimplifier::removeS(Triangle& triangle){
 	if (!qTreePoint->hasPointInTri(&triangle)){ //is there any city in this triangle?
 		if (!qTreeLine->hasPointInTri(&triangle)){ //is there any points on lines in this triangle?
 			if (map->lines[triangle.p[1]->lineInd]->kept < 7){ //is it the last point on the line?
-				for (int i = 0; i < map->lines[triangle.p[1]->lineInd]->shareEnd->size(); ++i){
-					if (map->lines[map->lines[triangle.p[1]->lineInd]->shareEnd->at(i)]->kept < 6)
+				for (int i = 0; i < map->lines[triangle.p[1]->lineInd]->shareEnd.size(); ++i){
+					if (map->lines[map->lines[triangle.p[1]->lineInd]->shareEnd[i]]->kept < 6)
 						return false; //Oops, sharing both endpoints with a segment
 				}
 			}
@@ -106,7 +105,7 @@ inline bool Simplifier::removeS(Triangle& triangle){
 	return false;
 }
 
-void Simplifier::simplify(int limit){
+void NaiveSimplifier::simplify(int limit){
 	Triangle triangle;
 	int last;
 	int removed = 1, total_removed = 0;
@@ -126,9 +125,8 @@ void Simplifier::simplify(int limit){
 					triangle.p[1] = triangle.p[2];
 					triangle.p[0] = map->lines[i]->points[triangle.p[1]->leftInd];
 					triangle.p[2] = map->lines[i]->points[triangle.p[1]->rightInd];
-					triangle.sortX();
-					triangle.sortY();
-					removeP(triangle);
+					triangle.sort();
+					removeS(triangle);
 				}
 			}
 			else{
@@ -136,9 +134,8 @@ void Simplifier::simplify(int limit){
 					triangle.p[1] = triangle.p[2];
 					triangle.p[0] = map->lines[i]->points[triangle.p[1]->leftInd];
 					triangle.p[2] = map->lines[i]->points[triangle.p[1]->rightInd];
-					triangle.sortX();
-					triangle.sortY();
-					removeP(triangle); //can I remove the current point?
+					triangle.sort();
+					removeS(triangle); //can I remove the current point?
 				}
 			}
 		}
@@ -152,16 +149,22 @@ void Simplifier::simplify(int limit){
 }
 
 /* Recursively remove points from Quadtree */
-void Simplifier::simplifyT(Index* &root, const Rect& rect, Triangle& tri){
+void NaiveSimplifier::simplifyT(Index* &root, const Rect& rect, Triangle& tri){
 	if (root->point == NULL){
 		if (root->subTree[0] != NULL)
 			simplifyT(root->subTree[0], rect, tri);
-		if (root != NULL && root->subTree[1] != NULL)
-			simplifyT(root->subTree[1], rect, tri);
-		if (root != NULL && root->subTree[2] != NULL)
-			simplifyT(root->subTree[2], rect, tri);
-		if (root != NULL && root->subTree[3] != NULL)
-			simplifyT(root->subTree[3], rect, tri);
+		if (root != NULL){
+			if (root->subTree[1] != NULL)
+				simplifyT(root->subTree[1], rect, tri);
+			if (root != NULL){
+				if (root->subTree[2] != NULL)
+					simplifyT(root->subTree[2], rect, tri);
+				if (root != NULL){
+					if (root->subTree[3] != NULL)
+						simplifyT(root->subTree[3], rect, tri);
+				}
+			}
+		}
 	}
 	if (root != NULL && root->point != NULL) {
 		if (map->lines[root->point->lineInd]->cycle && map->lines[root->point->lineInd]->kept == 4)
@@ -169,25 +172,25 @@ void Simplifier::simplifyT(Index* &root, const Rect& rect, Triangle& tri){
 		tri.p[0] = map->lines[root->point->lineInd]->points[root->point->leftInd];
 		tri.p[1] = root->point;
 		tri.p[2] = map->lines[root->point->lineInd]->points[root->point->rightInd];
-		tri.sortX();
-		tri.sortY();
+		tri.sort();
 		if (tri.maxX <= rect.maxX && tri.maxY <= rect.maxY &&
-			tri.minX >= rect.minX && tri.minY >= rect.minY) // pass those triangles accross boundary
+			tri.minX >= rect.minX && tri.minY >= rect.minY) // skip those triangles acrossing boundary
 			removeS(tri);
 	}
 }
 
 /*Divide main process into four threads. Triangle crossing quadtree boundary is processed at last*/
-void Simplifier::simplifyMT(int limit){
+void NaiveSimplifier::simplifyMT(int limit){
 	if (qTreeLine->subTree[0] != NULL){
 		Triangle tri1;
 		Triangle tri2;
 		Triangle tri3;
 		Triangle tri4;
-		thread t0(&Simplifier::simplifyT, this, qTreeLine->subTree[0], qTreeLine->subTree[0]->range, tri1);
-		thread t1(&Simplifier::simplifyT, this, qTreeLine->subTree[1], qTreeLine->subTree[1]->range, tri2);
-		thread t2(&Simplifier::simplifyT, this, qTreeLine->subTree[2], qTreeLine->subTree[2]->range, tri3);
-		thread t3(&Simplifier::simplifyT, this, qTreeLine->subTree[3], qTreeLine->subTree[3]->range, tri4);
+		thread t0(&NaiveSimplifier::simplifyT, this, qTreeLine->subTree[0], qTreeLine->subTree[0]->range, tri1);
+		thread t1(&NaiveSimplifier::simplifyT, this, qTreeLine->subTree[1], qTreeLine->subTree[1]->range, tri2);
+		thread t2(&NaiveSimplifier::simplifyT, this, qTreeLine->subTree[2], qTreeLine->subTree[2]->range, tri3);
+		thread t3(&NaiveSimplifier::simplifyT, this, qTreeLine->subTree[3], qTreeLine->subTree[3]->range, tri4);
+		
 		t0.join();
 		t1.join();
 		t2.join();
@@ -197,6 +200,20 @@ void Simplifier::simplifyMT(int limit){
 			qTreeLine->subTree[2]->size + qTreeLine->subTree[3]->size;
 		if (orig_size - qTreeLine->size >= limit)
 			return;
+		
+		/*Triangle tri[16];
+		thread t[16];
+		for (int i = 0; i < 16; ++i){
+			t[i] = thread(&Simplifier::simplifyT, this, qTreeLine->subTree[i / 4]->subTree[i % 4], qTreeLine->subTree[i / 4]->subTree[i % 4]->range, tri[i]);
+			t[i].join();
+		}
+		for (int i = 0; i < 4; ++i)
+			qTreeLine->subTree[i]->size = qTreeLine->subTree[i]->subTree[0]->size + qTreeLine->subTree[i]->subTree[1]->size +
+			qTreeLine->subTree[i]->subTree[2]->size + qTreeLine->subTree[i]->subTree[3]->size;
+		
+
+		qTreeLine->size = qTreeLine->subTree[0]->size + qTreeLine->subTree[1]->size +
+			qTreeLine->subTree[2]->size + qTreeLine->subTree[3]->size;*/
 		orig_size = qTreeLine->size;
 	}
 	simplify(limit);

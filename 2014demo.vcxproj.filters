@@ -24,9 +24,6 @@
     <ClInclude Include="targetver.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="Simplifier.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
     <ClInclude Include="QuadTree.h">
       <Filter>Header Files</Filter>
     </ClInclude>
@@ -39,21 +36,30 @@
     <ClInclude Include="FileIO.h">
       <Filter>Header Files</Filter>
     </ClInclude>
+    <ClInclude Include="NaiveSimplifier.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="VWSimplifier.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="stdafx.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="Simplify.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="Simplifier.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="QuadTree.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="FileIO.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="NaiveSimplifier.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="Simplify.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="VWSimlifier.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
   </ItemGroup>
