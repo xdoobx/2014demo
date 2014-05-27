@@ -157,6 +157,23 @@ bool KDTree::isIntersect(const Triangle* triangle){ //triangle * rectangle = 12
 		isCross(triangle->p[2], triangle->p[1], range.minX, range.maxY, range.minX, range.minY);
 }
 
-const Point* QuadTree::insert(Point* newPoint){
+const Point* KDTree::insert(Point* newPoint){
+	return NULL;
+}
+
+bool KDTree::subDivid(){
+	return false;
+}
+
+bool KDTree::remove(const Point* newPoint){
+	return false;
+}
+
+bool KDTree::hasPointInTri(const Triangle* triangle){
+	return false;
+}
+
+void KDTree::pointInTri(const Triangle* triangle, vector<Point*>* v){
 
 }
+
