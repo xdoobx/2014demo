@@ -4,10 +4,7 @@
 
 QuadTree::QuadTree(const double& minX, const double& maxX, const double& minY, const double& maxY)
 {
-	range.minX = minX;
-	range.maxX = maxX;
-	range.minY = minY;
-	range.maxY = maxY;
+	range = Rect(minX, maxX, minY, maxY);
 	size = 0;
 	point = NULL;
 	subTree[0] = NULL;
@@ -18,7 +15,6 @@ QuadTree::QuadTree(const double& minX, const double& maxX, const double& minY, c
 
 QuadTree::QuadTree(LineSet* map)
 {
-	//clock_t begin = clock();
 	range = Rect(map->minX - 0.1, map->maxX + 0.1, map->minY - 0.1, map->maxY + 0.1);
 	size = 0;
 	point = NULL;
@@ -31,7 +27,6 @@ QuadTree::QuadTree(LineSet* map)
 			insert(map->lines[i]->points[j]);
 		}
 	}
-	//cout << "construct line index cost: " << clock() - begin << endl;
 }
 
 QuadTree::QuadTree(LineSet* map, int mark)
@@ -151,7 +146,7 @@ QuadTree::QuadTree(PointSet* points)
 //	}
 //}
 
-inline bool QuadTree::isCross(const Point* p1, const Point* p2,
+bool QuadTree::isCross(const Point* p1, const Point* p2,
 	const double& p3x, const double& p3y, const double& p4x, const double& p4y){
 	double prod1 = (p3x - p1->x)*(p2->y - p3y) - (p3x - p2->x)*(p1->y - p3y);
 	double prod2 = (p4x - p1->x)*(p2->y - p4y) - (p4x - p2->x)*(p1->y - p4y);
@@ -166,7 +161,7 @@ inline bool QuadTree::isCross(const Point* p1, const Point* p2,
 	return true;
 }
 
-inline bool QuadTree::isIntersect(const Triangle* triangle){ //triangle * rectangle = 12
+bool QuadTree::isIntersect(const Triangle* triangle){ //triangle * rectangle = 12
 	return
 		isCross(triangle->p[0], triangle->p[1], range.minX, range.minY, range.maxX, range.minY) ||
 		isCross(triangle->p[0], triangle->p[2], range.minX, range.minY, range.maxX, range.minY) ||
@@ -182,7 +177,7 @@ inline bool QuadTree::isIntersect(const Triangle* triangle){ //triangle * rectan
 		isCross(triangle->p[2], triangle->p[1], range.minX, range.maxY, range.minX, range.minY);
 }
 
-inline const Point* QuadTree::insert (Point* newPoint){
+const Point* QuadTree::insert (Point* newPoint){
 	if (!range.isInside(newPoint))
 		return NULL;
 	if (size == 0){
@@ -276,7 +271,7 @@ inline const Point* QuadTree::insert (Point* newPoint){
 //	}
 //}
 
-inline bool QuadTree::subDivid(){
+bool QuadTree::subDivid(){
 	double halfW = range.minX + (range.maxX - range.minX) / 2; //divide original area into 4
 	double halfH = range.minY + (range.maxY - range.minY) / 2;
 	subTree[0] = new QuadTree(range.minX, halfW, range.minY, halfH);
@@ -319,7 +314,7 @@ inline bool QuadTree::subDivid(){
 	return false;
 }
 
-inline bool QuadTree::remove(const Point* newPoint){
+bool QuadTree::remove(const Point* newPoint){
 	if (!range.isInside(newPoint) || size == 0) //out of range
 		return false;
 
@@ -382,7 +377,7 @@ inline bool QuadTree::remove(const Point* newPoint){
 	return false;
 }
 
-inline bool QuadTree::hasPointInTri(const Triangle* triangle){
+bool QuadTree::hasPointInTri(const Triangle* triangle){
 	if (size == 0)
 		return false;
 	else if (size == 1)
@@ -401,7 +396,7 @@ inline bool QuadTree::hasPointInTri(const Triangle* triangle){
 	}
 }
 
-inline void QuadTree::pointInTri(const Triangle* triangle, vector<Point*>* v){
+void QuadTree::pointInTri(const Triangle* triangle, vector<Point*>* v){
 	if (size == 0)
 		return;
 	else if (size == 1){

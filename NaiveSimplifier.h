@@ -6,8 +6,8 @@
 
 class NaiveSimplifier{
 protected:
-	Index* qTreeLine; //index removable points
-	Index* qTreePoint; //index static points (constraint points + line endpoints)
+	QuadTree* qTreeLine; //index removable points
+	QuadTree* qTreePoint; //index static points (constraint points + line endpoints)
 	LineSet* map; //store lines
 	PointSet* points; //store constraint points
 	int orig_size; //number of unique points in line set
@@ -17,7 +17,7 @@ public:
 	NaiveSimplifier(char* lineFile, char* pointFile);
 	//~Simplifier();
 	void simplify(int limit); // use single processor
-	void simplifyT(Index* &root, const Rect& rect, Triangle& tri); // in each thread
+	void simplifyT(QuadTree* &root, const Rect& rect, Triangle& tri); // in each thread
 	void simplifyMT(int limit); //main precess for multi-thread
 	void wirteFile(string writeFile);
 };

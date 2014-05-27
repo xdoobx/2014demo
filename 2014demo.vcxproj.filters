@@ -27,9 +27,6 @@
     <ClInclude Include="QuadTree.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="Index.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
     <ClInclude Include="GeoUtility.h">
       <Filter>Header Files</Filter>
     </ClInclude>
@@ -42,12 +39,12 @@
     <ClInclude Include="VWSimplifier.h">
       <Filter>Header Files</Filter>
     </ClInclude>
+    <ClInclude Include="KDTree.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="stdafx.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="QuadTree.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="FileIO.cpp">
@@ -60,6 +57,12 @@
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="VWSimlifier.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="QuadTree.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="KDTree.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
   </ItemGroup>

@@ -3,36 +3,22 @@
 #include "NaiveSimplifier.h"
 
 NaiveSimplifier::NaiveSimplifier(char* lineFile, char* pointFile){
-	//clock_t begin = clock(), end;
 	LineSet* Map = readLines(lineFile);
 	PointSet* Points = readPoints(pointFile);
 	qTreeLine = new QuadTree(Map);
 	qTreePoint = new QuadTree(Map, Points);
+
 	map = Map;
 	points = Points;
 	orig_size = qTreeLine->size;
-//	end = clock();
-//	cout << "construction: " << end - begin << endl;
-//	cout << "total line points: " << qTreeLine->size<< endl;
-//	cout << "total constriant points: " << qTreePoint->size << endl;
 }
-
-//Simplifier::~Simplifier(){
-//	delete map;
-//	delete points;
-//	delete qTreeLine;
-//	delete qTreePoint;
-//	//delete qTreeEnd;
-//}
 
 void NaiveSimplifier::wirteFile(string writeFile) {
-	//clock_t begin = clock();
 	int length = map->lines.size() * 155 + (qTreeLine->size + 2 * map->lines.size()) * 38;
 	writeLines(map, writeFile, length);
-	//cout << "write into file: " << clock() - begin << endl;
 }
 
-inline bool NaiveSimplifier::removeP(Triangle &triangle){
+bool NaiveSimplifier::removeP(Triangle &triangle){
 	if (!qTreePoint->hasPointInTri(&triangle)){ //is there any city in this triangle?
 		if (!qTreeLine->hasPointInTri(&triangle)){ //is there any line-points in this triangle?
 			if (map->lines[triangle.p[1]->lineInd]->kept == 3){ //is it the last point on the line?
@@ -85,7 +71,7 @@ inline bool NaiveSimplifier::removeP(Triangle &triangle){
 	return false;
 }
 
-inline bool NaiveSimplifier::removeS(Triangle& triangle){
+bool NaiveSimplifier::removeS(Triangle& triangle){
 	if (!qTreePoint->hasPointInTri(&triangle)){ //is there any city in this triangle?
 		if (!qTreeLine->hasPointInTri(&triangle)){ //is there any points on lines in this triangle?
 			if (map->lines[triangle.p[1]->lineInd]->kept < 7){ //is it the last point on the line?
@@ -101,6 +87,8 @@ inline bool NaiveSimplifier::removeS(Triangle& triangle){
 			qTreeLine->remove(triangle.p[1]); //remove point from index
 			return true;
 		}
+		else
+			return false;
 	}
 	return false;
 }
@@ -109,9 +97,7 @@ void NaiveSimplifier::simplify(int limit){
 	Triangle triangle;
 	int last;
 	int removed = 1, total_removed = 0;
-	//clock_t begin, end;
 	while(total_removed < limit && removed != 0){ //repeat the process if more points need to be removed
-		//begin = clock();
 		for (int i = 0; i < map->lines.size(); ++i){ //for each line
 			triangle.p[1] = map->lines[i]->points[0];
 			last = map->lines[i]->points.size();
@@ -126,7 +112,7 @@ void NaiveSimplifier::simplify(int limit){
 					triangle.p[0] = map->lines[i]->points[triangle.p[1]->leftInd];
 					triangle.p[2] = map->lines[i]->points[triangle.p[1]->rightInd];
 					triangle.sort();
-					removeS(triangle);
+					removeP(triangle);
 				}
 			}
 			else{
@@ -135,21 +121,18 @@ void NaiveSimplifier::simplify(int limit){
 					triangle.p[0] = map->lines[i]->points[triangle.p[1]->leftInd];
 					triangle.p[2] = map->lines[i]->points[triangle.p[1]->rightInd];
 					triangle.sort();
-					removeS(triangle); //can I remove the current point?
+					removeP(triangle); //can I remove the current point?
 				}
 			}
 		}
-		//end = clock();
 		removed = orig_size - qTreeLine->size;
 		total_removed += removed;
 		orig_size = qTreeLine->size;
-		//cout << "remove points: " << removed << "\ttime cost: " << end - begin << endl;
 	}
-	//cout << qTreeLine->size << endl;
 }
 
 /* Recursively remove points from Quadtree */
-void NaiveSimplifier::simplifyT(Index* &root, const Rect& rect, Triangle& tri){
+void NaiveSimplifier::simplifyT(QuadTree* &root, const Rect& rect, Triangle& tri){
 	if (root->point == NULL){
 		if (root->subTree[0] != NULL)
 			simplifyT(root->subTree[0], rect, tri);

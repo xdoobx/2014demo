@@ -1,11 +1,9 @@
-#ifndef _QUADTREE_H_
-#define _QUADTREE_H_
+#ifndef _KDTREE_H_
+#define _KDTREE_H_
 
-#include "FileIO.h"
-#include <stack>
+#include "QuadTree.h"
 
-class QuadTree{
-
+class KDTree{
 private:
 	inline bool subDivid();
 	inline bool isCross(const Point* p1, const Point* p2,
@@ -16,13 +14,14 @@ public:
 	int size; // number of points under the node
 
 	Point* point; //if it is a leaf node, it should record a point, otherwise null
-	QuadTree* subTree[4]; //any index should guarantee they have 4 subtree under root node
+	KDTree* subTree1; //any index should guarantee they have 4 subtree under root node
+	KDTree* subTree2;
 
-	QuadTree(const double& minX, const double& maxX, const double& minY, const double& maxY);//construct empty qtree
-	QuadTree(LineSet* map); //construct qtree with inner points in a map
-	QuadTree(LineSet* map, int mark); //construct qtree with endpoints in a map
-	QuadTree(LineSet* map, PointSet* points); //construct qtree with endpoints and constraint points
-	QuadTree(PointSet* points); //construct qtree with constraint points
+	KDTree(const double& minX, const double& maxX, const double& minY, const double& maxY);//construct empty qtree
+	KDTree(LineSet* map); //construct qtree with inner points in a map
+	KDTree(LineSet* map, int mark); //construct qtree with endpoints in a map
+	KDTree(LineSet* map, PointSet* points); //construct qtree with endpoints and constraint points
+	KDTree(PointSet* points); //construct qtree with constraint points
 	//~QuadTree();
 	inline const Point* insert(Point* point);
 	virtual inline bool hasPointInTri(const Triangle* triangle);

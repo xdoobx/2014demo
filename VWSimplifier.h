@@ -6,6 +6,7 @@
 class VWSimplifier : public NaiveSimplifier{
 private:
 	vector<Triangle*> tri_area[4];
+	int heap_size[4];
 
 	//update heap when a triangle is modified
 	inline void heap_update(int heap, int index);

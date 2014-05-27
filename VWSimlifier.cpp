@@ -3,101 +3,6 @@
 #include "VWSimplifier.h"
 #include <algorithm>
 
-inline bool comp(Triangle* tri1, Triangle* tri2){
-	return tri1->area > tri2->area;
-}
-
-inline void VWSimplifier::heap_update(int heap, int index){
-	Triangle* temp;
-	Triangle* to_swap;
-	if (tri_area[heap][index]->area < tri_area[heap][index / 2]->area){
-		while (tri_area[heap][index]->area < tri_area[heap][index / 2]->area){
-			temp = tri_area[heap][index];
-			tri_area[heap][index] = tri_area[heap][index / 2];
-			tri_area[heap][index / 2] = temp;
-			tri_area[heap][index / 2]->ind = tri_area[heap][index]->ind;
-			tri_area[heap][index]->ind = index;
-			index /= 2;
-		}
-		return;
-	}
-
-	if (index * 2 + 2 < tri_area[heap].size() - 1){
-		if (tri_area[heap][index * 2 + 1]->area > tri_area[heap][index * 2 + 2]->area)
-			to_swap = tri_area[heap][index * 2 + 2];
-		else
-			to_swap = tri_area[heap][index * 2 + 1];
-	}
-	else if (index * 2 + 1 < tri_area[heap].size() - 1)
-		to_swap = tri_area[heap][index * 2 + 1];
-	else
-		return;
-
-	if (tri_area[heap][index]->area > to_swap->area){
-		while (tri_area[heap][index]->area > to_swap->area){
-			temp = tri_area[heap][index];
-			tri_area[heap][index] = to_swap;
-			tri_area[heap][to_swap->ind] = temp;
-			tri_area[heap][to_swap->ind]->ind = to_swap->ind;
-			tri_area[heap][index]->ind = index;
-			index = temp->ind;
-			if (index * 2 + 2 < tri_area[heap].size() - 1){
-				if (tri_area[heap][index * 2 + 1]->area > tri_area[heap][index * 2 + 2]->area)
-					to_swap = tri_area[heap][index * 2 + 2];
-				else
-					to_swap = tri_area[heap][index * 2 + 1];
-			}
-			else if (index * 2 + 1 < tri_area[heap].size() - 1)
-				to_swap = tri_area[heap][index * 2 + 1];
-			else
-				return;
-		}
-	}
-}
-
-inline void VWSimplifier::heap_pop(int heap){
-	Triangle* temp = tri_area[heap][0];
-	Triangle* to_swap;
-	int index = 0;
-	tri_area[heap][0] = tri_area[heap].back();
-	tri_area[heap].back() = temp;
-	tri_area[heap].back()->ind = tri_area[heap][0]->ind;
-	tri_area[heap][0]->ind = 0;
-
-	if (index * 2 + 2 < tri_area[heap].size() - 1){
-		if (tri_area[heap][index * 2 + 1]->area > tri_area[heap][index * 2 + 2]->area)
-			to_swap = tri_area[heap][index * 2 + 2];
-		else
-			to_swap = tri_area[heap][index * 2 + 1];
-	}
-	else if (index * 2 + 1 < tri_area[heap].size() - 1)
-		to_swap = tri_area[heap][index * 2 + 1];
-	else
-		return;
-
-	if (tri_area[heap][index]->area > to_swap->area){
-		while (tri_area[heap][index]->area > to_swap->area){
-			temp = tri_area[heap][index];
-			tri_area[heap][index] = to_swap;
-			tri_area[heap][to_swap->ind] = temp;
-			tri_area[heap][to_swap->ind]->ind = to_swap->ind;
-			tri_area[heap][index]->ind = index;
-			index = temp->ind;
-			if (index * 2 + 2 < tri_area[heap].size() - 1){
-				if (tri_area[heap][index * 2 + 1]->area > tri_area[heap][index * 2 + 2]->area)
-					to_swap = tri_area[heap][index * 2 + 2];
-				else
-					to_swap = tri_area[heap][index * 2 + 1];
-			}
-			else if (index * 2 + 1 < tri_area[heap].size() - 1)
-				to_swap = tri_area[heap][index * 2 + 1];
-			else
-				return;
-		}
-	}
-}
-
-
 VWSimplifier::VWSimplifier(char* lineFile, char* pointFile) : NaiveSimplifier(lineFile, pointFile){
 	double halfW = qTreeLine->subTree[0]->range.maxX;
 	double halfH = qTreeLine->subTree[0]->range.maxY;
@@ -112,6 +17,7 @@ VWSimplifier::VWSimplifier(char* lineFile, char* pointFile) : NaiveSimplifier(li
 			tri->sort();
 			tri->calArea();
 			tri->pre = NULL;
+
 			if (tri->p[1]->x < halfW){
 				if (tri->p[1]->y < halfH)
 					tri_area[0].push_back(tri);
@@ -152,62 +58,131 @@ VWSimplifier::VWSimplifier(char* lineFile, char* pointFile) : NaiveSimplifier(li
 	}
 }
 
-//to be optimized
-/*void VWSimplifier::simplify(int limit){
-	int size = tri_area.size();
-	for (int i = 0; i < limit; ++i){
-		heap_pop();
-		if (!removeS(*tri_area.back()))
-			--i;
-		if (tri_area.back()->pre != NULL){
-			tri_area.back()->pre->p[2] = map->lines[tri_area.back()->pre->p[1]->lineInd]
-				->points[tri_area.back()->pre->p[1]->rightInd];
-			tri_area.back()->pre->sort();
-			tri_area.back()->pre->calArea();
-			tri_area.back()->pre->next = tri_area.back()->next;
-			heap_update(tri_area.back()->pre->ind);
-		}
-		if (tri_area.back()->next != NULL){
-			tri_area.back()->next->p[0] = map->lines[tri_area.back()->next->p[1]->lineInd]
-				->points[tri_area.back()->next->p[1]->leftInd];
-			tri_area.back()->next->sort();
-			tri_area.back()->next->calArea();
-			tri_area.back()->next->pre = tri_area.back()->pre;
-			heap_update(tri_area.back()->next->ind);
-		}
-		tri_area.pop_back();
-		if (tri_area.size() == 0)
-			break;
-	}
-}*/
+//function to judge which triangle is bigger
+inline bool comp(Triangle* tri1, Triangle* tri2){
+	return tri1->area > tri2->area;
+}
 
+inline void VWSimplifier::heap_update(int heap, int index){
+	Triangle* temp;
+	Triangle* to_swap;
+	
+	//upward swap
+	if (tri_area[heap][index]->area < tri_area[heap][index / 2]->area){
+		while (tri_area[heap][index]->area < tri_area[heap][index / 2]->area){
+			temp = tri_area[heap][index];
+			tri_area[heap][index] = tri_area[heap][index / 2];
+			tri_area[heap][index / 2] = temp;
+			tri_area[heap][index / 2]->ind = tri_area[heap][index]->ind;
+			tri_area[heap][index]->ind = index;
+			index /= 2;
+		}
+		return;
+	}
+
+	//downward swap
+	if (index * 2 + 2 < heap_size[heap]){
+		if (tri_area[heap][index * 2 + 1]->area > tri_area[heap][index * 2 + 2]->area)
+			to_swap = tri_area[heap][index * 2 + 2];
+		else
+			to_swap = tri_area[heap][index * 2 + 1];
+	}
+	else if (index * 2 + 1 < heap_size[heap])
+		to_swap = tri_area[heap][index * 2 + 1];
+	else
+		return;
+
+	if (tri_area[heap][index]->area > to_swap->area){
+		while (tri_area[heap][index]->area > to_swap->area){
+			temp = tri_area[heap][index];
+			tri_area[heap][index] = to_swap;
+			tri_area[heap][to_swap->ind] = temp;
+			tri_area[heap][to_swap->ind]->ind = to_swap->ind;
+			tri_area[heap][index]->ind = index;
+			index = temp->ind;
+			if (index * 2 + 2 < heap_size[heap]){
+				if (tri_area[heap][index * 2 + 1]->area > tri_area[heap][index * 2 + 2]->area)
+					to_swap = tri_area[heap][index * 2 + 2];
+				else
+					to_swap = tri_area[heap][index * 2 + 1];
+			}
+			else if (index * 2 + 1 < heap_size[heap])
+				to_swap = tri_area[heap][index * 2 + 1];
+			else
+				return;
+		}
+	}
+}
+
+inline void VWSimplifier::heap_pop(int heap){
+	Triangle* temp = tri_area[heap][0];
+	Triangle* to_swap;
+	int index = 0;
+	tri_area[heap][0] = tri_area[heap][heap_size[heap]];
+	tri_area[heap][heap_size[heap]] = temp;
+	tri_area[heap][heap_size[heap]]->ind = tri_area[heap][0]->ind;
+	tri_area[heap][0]->ind = 0;
+
+	if (index * 2 + 2 < heap_size[heap]){
+		if (tri_area[heap][index * 2 + 1]->area > tri_area[heap][index * 2 + 2]->area)
+			to_swap = tri_area[heap][index * 2 + 2];
+		else
+			to_swap = tri_area[heap][index * 2 + 1];
+	}
+	else if (index * 2 + 1 < heap_size[heap])
+		to_swap = tri_area[heap][index * 2 + 1];
+	else
+		return;
+
+	if (tri_area[heap][index]->area > to_swap->area){
+		while (tri_area[heap][index]->area > to_swap->area){
+			temp = tri_area[heap][index];
+			tri_area[heap][index] = to_swap;
+			tri_area[heap][to_swap->ind] = temp;
+			tri_area[heap][to_swap->ind]->ind = to_swap->ind;
+			tri_area[heap][index]->ind = index;
+			index = temp->ind;
+			if (index * 2 + 2 < heap_size[heap]){
+				if (tri_area[heap][index * 2 + 1]->area > tri_area[heap][index * 2 + 2]->area)
+					to_swap = tri_area[heap][index * 2 + 2];
+				else
+					to_swap = tri_area[heap][index * 2 + 1];
+			}
+			else if (index * 2 + 1 < heap_size[heap])
+				to_swap = tri_area[heap][index * 2 + 1];
+			else
+				return;
+		}
+	}
+}
 
 void VWSimplifier::simplifyT(int heap, int limit){ // in each thread
 	double halfW = qTreeLine->subTree[0]->range.maxX;
 	double halfH = qTreeLine->subTree[0]->range.maxY;
-	int size = tri_area[heap].size();
-	Triangle* back = NULL;
+	heap_size[heap] = tri_area[heap].size() - 1;
+	Triangle* back = NULL; // record triangle to be removed
 
 	make_heap(tri_area[heap].begin(), tri_area[heap].end(), comp);
-	for (int i = 0; i < tri_area[heap].size(); ++i){
+	for (int i = 0; i <= heap_size[heap]; ++i){
 		tri_area[heap][i]->ind = i;
 	}
 
 	for (int i = 0; i < limit; ++i){
 		heap_pop(heap);
-		back = tri_area[heap].back();
+		back = tri_area[heap][heap_size[heap]];
+		--heap_size[heap];
 		if (back->maxX > qTreeLine->subTree[heap]->range.maxX ||
 			back->maxY > qTreeLine->subTree[heap]->range.maxY ||
 			back->minX <= qTreeLine->subTree[heap]->range.minX ||
 			back->minY <= qTreeLine->subTree[heap]->range.minY ||
 			!removeS(*back)){
-			--i;
+			--i; // not counted as removed
 			if (back->pre != NULL)
 				back->pre->next = NULL;
 			if (back->next != NULL)
 				back->next->pre = NULL;
 		}
-		else{
+		else{ // update two neighbour triangles
 			if (back->pre != NULL){
 				back->pre->p[2] = map->lines[back->pre->p[1]->lineInd]->points[back->pre->p[1]->rightInd];
 				back->pre->sort();
@@ -247,8 +222,8 @@ void VWSimplifier::simplifyT(int heap, int limit){ // in each thread
 				}
 			}
 		}
-		tri_area[heap].pop_back();
-		if (tri_area[heap].size() == 0)
+		//tri_area[heap].pop_back();
+		if (heap_size[heap] == 0)
 			break;
 	}
 }
