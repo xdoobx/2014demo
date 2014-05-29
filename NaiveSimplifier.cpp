@@ -162,9 +162,30 @@ void NaiveSimplifier::simplifyT(QuadTree* &root, const Rect& rect, Triangle& tri
 	}
 }
 
+void NaiveSimplifier::simplify2T(QuadTree* &root1, QuadTree* &root2, const Rect& rect, Triangle& tri){
+	simplifyT(root1, rect, tri);
+	simplifyT(root2, rect, tri);
+}
+
 /*Divide main process into four threads. Triangle crossing quadtree boundary is processed at last*/
 void NaiveSimplifier::simplifyMT(int limit){
 	if (qTreeLine->subTree[0] != NULL){
+		/*Triangle tri1;
+		Triangle tri2;
+		thread t0(&NaiveSimplifier::simplify2T, this, qTreeLine->subTree[0], qTreeLine->subTree[1],
+			Rect(qTreeLine->range.minX, qTreeLine->subTree[0]->range.maxX,
+			qTreeLine->range.minY, qTreeLine->range.maxY), tri1);
+		thread t1(&NaiveSimplifier::simplify2T, this, qTreeLine->subTree[2], qTreeLine->subTree[3],
+			Rect(qTreeLine->subTree[0]->range.maxX, qTreeLine->range.maxX,
+			qTreeLine->range.minY, qTreeLine->range.maxY), tri2);
+
+		t0.join();
+		t1.join();
+		qTreeLine->size = qTreeLine->subTree[0]->size + qTreeLine->subTree[1]->size +
+			qTreeLine->subTree[2]->size + qTreeLine->subTree[3]->size;
+		if (orig_size - qTreeLine->size >= limit)
+			return;*/
+		
 		Triangle tri1;
 		Triangle tri2;
 		Triangle tri3;
@@ -183,11 +204,40 @@ void NaiveSimplifier::simplifyMT(int limit){
 			qTreeLine->subTree[2]->size + qTreeLine->subTree[3]->size;
 		if (orig_size - qTreeLine->size >= limit)
 			return;
-		
+
+		/*Triangle tri[8];
+		thread t[8];
+		for (int i = 0; i < 8; i+=2){
+			t[i] = thread(&NaiveSimplifier::simplify2T, this, qTreeLine->subTree[i / 2]->subTree[2 * i % 4],
+				qTreeLine->subTree[i / 2]->subTree[2 * i % 4 + 1],
+				Rect(qTreeLine->subTree[i / 2]->range.minX,
+				(qTreeLine->subTree[i / 2]->range.minX + qTreeLine->subTree[i / 2]->range.maxX) / 2,
+				qTreeLine->subTree[i / 2]->range.minY, qTreeLine->subTree[i / 2]->range.maxY),
+				tri[i]);
+			t[i + 1] = thread(&NaiveSimplifier::simplify2T, this, qTreeLine->subTree[(i + 1) / 2]->subTree[2 * (i + 1) % 4],
+				qTreeLine->subTree[(i + 1) / 2]->subTree[2 * (i + 1) % 4 + 1],
+				Rect((qTreeLine->subTree[(i + 1) / 2]->range.minX + qTreeLine->subTree[(i + 1) / 2]->range.maxX) / 2,
+				qTreeLine->subTree[(i + 1) / 2]->range.maxX,
+				qTreeLine->subTree[(i + 1) / 2]->range.minY, qTreeLine->subTree[(i + 1) / 2]->range.maxY),
+				tri[i + 1]);
+			t[i].join();
+			t[i + 1].join();
+		}
+		for (int i = 0; i < 4; ++i)
+			qTreeLine->subTree[i]->size = qTreeLine->subTree[i]->subTree[0]->size + qTreeLine->subTree[i]->subTree[1]->size +
+			qTreeLine->subTree[i]->subTree[2]->size + qTreeLine->subTree[i]->subTree[3]->size;
+
+
+		qTreeLine->size = qTreeLine->subTree[0]->size + qTreeLine->subTree[1]->size +
+			qTreeLine->subTree[2]->size + qTreeLine->subTree[3]->size;
+		orig_size = qTreeLine->size;
+		if (orig_size - qTreeLine->size >= limit)
+			return;*/
+
 		/*Triangle tri[16];
 		thread t[16];
 		for (int i = 0; i < 16; ++i){
-			t[i] = thread(&Simplifier::simplifyT, this, qTreeLine->subTree[i / 4]->subTree[i % 4], qTreeLine->subTree[i / 4]->subTree[i % 4]->range, tri[i]);
+			t[i] = thread(&NaiveSimplifier::simplifyT, this, qTreeLine->subTree[i / 4]->subTree[i % 4], qTreeLine->subTree[i / 4]->subTree[i % 4]->range, tri[i]);
 			t[i].join();
 		}
 		for (int i = 0; i < 4; ++i)
@@ -196,8 +246,10 @@ void NaiveSimplifier::simplifyMT(int limit){
 		
 
 		qTreeLine->size = qTreeLine->subTree[0]->size + qTreeLine->subTree[1]->size +
-			qTreeLine->subTree[2]->size + qTreeLine->subTree[3]->size;*/
+			qTreeLine->subTree[2]->size + qTreeLine->subTree[3]->size;
 		orig_size = qTreeLine->size;
+		if (orig_size - qTreeLine->size >= limit)
+			return;*/
 	}
 	simplify(limit);
 }

@@ -1,23 +1,24 @@
 #include "stdafx.h"
-#include "KDTree.h"
+#include "GridTree.h"
 
-KDTree::KDTree(const double& minX, const double& maxX, const double& minY, const double& maxY){
+GridTree::GridTree(const double& minX, const double& maxX, const double& minY, const double& maxY){
 	range.minX = minX;
 	range.maxX = maxX;
 	range.minY = minY;
 	range.maxY = maxY;
+	gridW = (range.maxX - range.minX) / divideW;
+	gridH = (range.maxY - range.minY) / divideH;
+	grid = new vector<Point*>*[divideW];
+	for (int i = 0; i < divideH; ++i)
+		grid[i] = new vector<Point*>[divideH];
 	size = 0;
-	point = NULL;
-	subTree1 = NULL;
-	subTree2 = NULL;
 }
 
-KDTree::KDTree(LineSet* map){
+GridTree::GridTree(LineSet* map){
 	range = Rect(map->minX - 0.1, map->maxX + 0.1, map->minY - 0.1, map->maxY + 0.1);
+	gridW = (range.maxX - range.minX) / divideW;
+	gridH = (range.maxY - range.minY) / divideH;
 	size = 0;
-	point = NULL;
-	subTree1 = NULL;
-	subTree2 = NULL;
 	for (int i = 0; i < map->lines.size(); ++i){
 		for (int j = 1; j < map->lines[i]->points.size() - 1; ++j){
 			insert(map->lines[i]->points[j]);
@@ -25,24 +26,22 @@ KDTree::KDTree(LineSet* map){
 	}
 }
 
-KDTree::KDTree(LineSet* map, int mark){
+GridTree::GridTree(LineSet* map, int mark){
 	range = Rect(map->minX - 0.1, map->maxX + 0.1, map->minY - 0.1, map->maxY + 0.1);
+	gridW = (range.maxX - range.minX) / divideW;
+	gridH = (range.maxY - range.minY) / divideH;
 	size = 0;
-	point = NULL;
-	subTree1 = NULL;
-	subTree2 = NULL;
 	for (int i = 0; i < map->lines.size(); ++i){
 		insert(map->lines[i]->points[0]);
 		insert(map->lines[i]->points[map->lines[i]->points.size() - 1]);
 	}
 }
 
-KDTree::KDTree(LineSet* map, PointSet* points){
+GridTree::GridTree(LineSet* map, PointSet* points){
 	range = Rect(map->minX - 0.1, map->maxX + 0.1, map->minY - 0.1, map->maxY + 0.1);
+	gridW = (range.maxX - range.minX) / divideW;
+	gridH = (range.maxY - range.minY) / divideH;
 	size = 0;
-	point = NULL;
-	subTree1 = NULL;
-	subTree2 = NULL;
 	for (int i = 0; i < points->points.size(); ++i)
 		insert(points->points[i]);
 	const Point* temp;
@@ -114,66 +113,31 @@ KDTree::KDTree(LineSet* map, PointSet* points){
 	map->getShare(); // find the lines sharing both endpoints
 }
 
-KDTree::KDTree(PointSet* points){
+GridTree::GridTree(PointSet* points){
 	range = Rect(points->minX - 0.1, points->maxX + 0.1, points->minY - 0.1, points->maxY + 0.1);
+	gridW = (range.maxX - range.minX) / divideW;
+	gridH = (range.maxY - range.minY) / divideH;
 	size = 0;
-	point = NULL;
-	subTree1 = NULL;
-	subTree2 = NULL;
 	for (int i = 0; i < points->points.size(); ++i)
 		insert(points->points[i]);
 }
 
-
-bool KDTree::isCross(const Point* p1, const Point* p2,
-	const double& p3x, const double& p3y, const double& p4x, const double& p4y){
-	double prod1 = (p3x - p1->x)*(p2->y - p3y) - (p3x - p2->x)*(p1->y - p3y);
-	double prod2 = (p4x - p1->x)*(p2->y - p4y) - (p4x - p2->x)*(p1->y - p4y);
-	if ((prod1 > 0) == (prod2 > 0) || prod1 == 0 || prod2 == 0) // p1p2 divide p3p4
-		return false;
-
-	prod1 = (p1->x - p3x)*(p4y - p1->y) - (p1->x - p4x)*(p3y - p1->y);
-	prod2 = (p2->x - p3x)*(p4y - p2->y) - (p2->x - p4x)*(p3y - p2->y);
-	if ((prod1 > 0) == (prod2 > 0) || prod1 == 0 || prod2 == 0) //p3p4 divide p1p2
-		return false;
-
-	return true;
+const Point* GridTree::insert(Point* newPoint){
+	int gridX = (newPoint->x - range.minX) / gridW;
+	int gridY = (newPoint->y - range.minY) / gridH;
+	grid[gridX][gridY].push_back(newPoint); // even though this point overlays a previous point
+	return newPoint;
 }
 
-
-bool KDTree::isIntersect(const Triangle* triangle){ //triangle * rectangle = 12
-	return
-		isCross(triangle->p[0], triangle->p[1], range.minX, range.minY, range.maxX, range.minY) ||
-		isCross(triangle->p[0], triangle->p[2], range.minX, range.minY, range.maxX, range.minY) ||
-		isCross(triangle->p[2], triangle->p[1], range.minX, range.minY, range.maxX, range.minY) ||
-		isCross(triangle->p[0], triangle->p[1], range.maxX, range.minY, range.maxX, range.maxY) ||
-		isCross(triangle->p[0], triangle->p[2], range.maxX, range.minY, range.maxX, range.maxY) ||
-		isCross(triangle->p[2], triangle->p[1], range.maxX, range.minY, range.maxX, range.maxY) ||
-		isCross(triangle->p[0], triangle->p[1], range.maxX, range.maxY, range.minX, range.maxY) ||
-		isCross(triangle->p[0], triangle->p[2], range.maxX, range.maxY, range.minX, range.maxY) ||
-		isCross(triangle->p[2], triangle->p[1], range.maxX, range.maxY, range.minX, range.maxY) ||
-		isCross(triangle->p[0], triangle->p[1], range.minX, range.maxY, range.minX, range.minY) ||
-		isCross(triangle->p[0], triangle->p[2], range.minX, range.maxY, range.minX, range.minY) ||
-		isCross(triangle->p[2], triangle->p[1], range.minX, range.maxY, range.minX, range.minY);
-}
-
-const Point* KDTree::insert(Point* newPoint){
-	return NULL;
-}
-
-bool KDTree::subDivid(){
+bool GridTree::remove(const Point* newPoint){
 	return false;
 }
 
-bool KDTree::remove(const Point* newPoint){
+bool GridTree::hasPointInTri(const Triangle* triangle){
 	return false;
 }
 
-bool KDTree::hasPointInTri(const Triangle* triangle){
-	return false;
-}
-
-void KDTree::pointInTri(const Triangle* triangle, vector<Point*>* v){
+void GridTree::pointInTri(const Triangle* triangle, vector<Point*>* v){
 
 }
 

@@ -3,6 +3,7 @@
 
 #include "FileIO.h"
 #include <stack>
+#include <thread>
 
 class QuadTree{
 
@@ -12,6 +13,8 @@ private:
 		const double& p3x, const double& p3y, const double& p4x, const double& p4y);
 	inline bool isIntersect(const Triangle* triangle);
 public:
+	double halfW;
+	double halfH;
 	Rect range; //range of current branch node
 	int size; // number of points under the node
 
@@ -24,6 +27,7 @@ public:
 	QuadTree(LineSet* map, PointSet* points); //construct qtree with endpoints and constraint points
 	QuadTree(PointSet* points); //construct qtree with constraint points
 	//~QuadTree();
+	void insertBranch(const vector<Point*>& points, QuadTree* branch);
 	inline const Point* insert(Point* point);
 	virtual inline bool hasPointInTri(const Triangle* triangle);
 	virtual inline void pointInTri(const Triangle* triangle, vector<Point*>* v);

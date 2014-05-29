@@ -5,6 +5,8 @@
 QuadTree::QuadTree(const double& minX, const double& maxX, const double& minY, const double& maxY)
 {
 	range = Rect(minX, maxX, minY, maxY);
+	halfW = range.minX + (range.maxX - range.minX) / 2;
+	halfH = range.minY + (range.maxY - range.minY) / 2;
 	size = 0;
 	point = NULL;
 	subTree[0] = NULL;
@@ -16,6 +18,8 @@ QuadTree::QuadTree(const double& minX, const double& maxX, const double& minY, c
 QuadTree::QuadTree(LineSet* map)
 {
 	range = Rect(map->minX - 0.1, map->maxX + 0.1, map->minY - 0.1, map->maxY + 0.1);
+	halfW = (range.minX + range.maxX) / 2;
+	halfH = (range.minY + range.maxY) / 2;
 	size = 0;
 	point = NULL;
 	subTree[0] = NULL;
@@ -27,11 +31,45 @@ QuadTree::QuadTree(LineSet* map)
 			insert(map->lines[i]->points[j]);
 		}
 	}
+	/*subTree[0] = new QuadTree(range.minX, halfW, range.minY, halfH);
+	subTree[1] = new QuadTree(range.minX, halfW, halfH, range.maxY);
+	subTree[2] = new QuadTree(halfW, range.maxX, halfH, range.maxY);
+	subTree[3] = new QuadTree(halfW, range.maxX, range.minY, halfH);
+	vector<Point*> branch[4];
+	for (int i = 0; i < map->lines.size(); ++i){
+		for (int j = 1; j < map->lines[i]->points.size() - 1; ++j){
+			if (map->lines[i]->points[j]->x <= halfW){
+				if (map->lines[i]->points[j]->y <= halfH)
+					branch[0].push_back(map->lines[i]->points[j]);
+				else
+					branch[1].push_back(map->lines[i]->points[j]);
+			}
+			else{
+				if (map->lines[i]->points[j]->y <= halfH)
+					branch[3].push_back(map->lines[i]->points[j]);
+				else
+					branch[2].push_back(map->lines[i]->points[j]);
+			}
+		}
+	}
+	thread t0(&QuadTree::insertBranch, this, branch[0], subTree[0]);
+	thread t1(&QuadTree::insertBranch, this, branch[1], subTree[1]);
+	thread t2(&QuadTree::insertBranch, this, branch[2], subTree[2]);
+	thread t3(&QuadTree::insertBranch, this, branch[3], subTree[3]);
+	t0.join();
+	t1.join();
+	t2.join();
+	t3.join();
+
+	size = subTree[0]->size + subTree[1]->size +
+		subTree[2]->size + subTree[3]->size;*/
 }
 
 QuadTree::QuadTree(LineSet* map, int mark)
 {
 	range = Rect(map->minX - 0.1, map->maxX + 0.1, map->minY - 0.1, map->maxY + 0.1);
+	halfW = range.minX + (range.maxX - range.minX) / 2;
+	halfH = range.minY + (range.maxY - range.minY) / 2;
 	size = 0;
 	point = NULL;
 	subTree[0] = NULL;
@@ -47,6 +85,8 @@ QuadTree::QuadTree(LineSet* map, int mark)
 QuadTree::QuadTree(LineSet* map, PointSet* points)
 {
 	range = Rect(map->minX - 0.1, map->maxX + 0.1, map->minY - 0.1, map->maxY + 0.1);
+	halfW = range.minX + (range.maxX - range.minX) / 2;
+	halfH = range.minY + (range.maxY - range.minY) / 2;
 	size = 0;
 	point = NULL;
 	subTree[0] = NULL;
@@ -127,6 +167,8 @@ QuadTree::QuadTree(LineSet* map, PointSet* points)
 QuadTree::QuadTree(PointSet* points)
 {
 	range = Rect(points->minX - 0.1, points->maxX + 0.1, points->minY - 0.1, points->maxY + 0.1);
+	halfW = range.minX + (range.maxX - range.minX) / 2;
+	halfH = range.minY + (range.maxY - range.minY) / 2;
 	size = 0;
 	point = NULL;
 	subTree[0] = NULL;
@@ -177,6 +219,11 @@ bool QuadTree::isIntersect(const Triangle* triangle){ //triangle * rectangle = 1
 		isCross(triangle->p[2], triangle->p[1], range.minX, range.maxY, range.minX, range.minY);
 }
 
+void QuadTree::insertBranch(const vector<Point*>& points, QuadTree* branch){
+	for (int i = 0; i < points.size(); ++i)
+		branch->insert(points[i]);
+}
+
 const Point* QuadTree::insert (Point* newPoint){
 	if (!range.isInside(newPoint))
 		return NULL;
@@ -192,8 +239,6 @@ const Point* QuadTree::insert (Point* newPoint){
 		subDivid();
 
 	const Point* p;
-	double halfW = subTree[0]->range.maxX;
-	double halfH = subTree[0]->range.maxY;
 	if (newPoint->x <= halfW){
 		if (newPoint->y <= halfH){
 			if ((p = subTree[0]->insert(newPoint)) == newPoint){
@@ -272,8 +317,6 @@ const Point* QuadTree::insert (Point* newPoint){
 //}
 
 bool QuadTree::subDivid(){
-	double halfW = range.minX + (range.maxX - range.minX) / 2; //divide original area into 4
-	double halfH = range.minY + (range.maxY - range.minY) / 2;
 	subTree[0] = new QuadTree(range.minX, halfW, range.minY, halfH);
 	subTree[1] = new QuadTree(range.minX, halfW, halfH, range.maxY);
 	subTree[2] = new QuadTree(halfW, range.maxX, halfH, range.maxY);
@@ -319,8 +362,6 @@ bool QuadTree::remove(const Point* newPoint){
 		return false;
 
 	if (subTree[0] != NULL){ //have children
-		double halfW = subTree[0]->range.maxX;
-		double halfH = subTree[0]->range.maxY;
 		bool removed = false;
 		if (newPoint->x <= halfW){
 			if (newPoint->y <= halfH){

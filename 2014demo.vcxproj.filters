@@ -39,7 +39,7 @@
     <ClInclude Include="VWSimplifier.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="KDTree.h">
+    <ClInclude Include="GridTree.h">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>
@@ -62,7 +62,7 @@
     <ClCompile Include="QuadTree.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="KDTree.cpp">
+    <ClCompile Include="GridTree.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
   </ItemGroup>
