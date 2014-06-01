@@ -19,6 +19,7 @@ public:
 	void simplifyT(QuadTree* &root, const Rect& rect, Triangle& tri); // in each thread
 	void simplify2T(QuadTree* &root1, QuadTree* &root2, const Rect& rect, Triangle& tri);
 	void simplifyMT(int limit); //main precess for multi-thread
+	//void simplify5(int limit);
 	void wirteFile(string writeFile);
 };
 
