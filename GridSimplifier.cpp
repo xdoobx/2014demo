@@ -84,11 +84,24 @@ void GridSimplifier::simplifyT(int xl, int xr, int yl, int yr, const Rect& rect,
 	}
 }
 
+void GridSimplifier::simplifyTL(int index, Triangle& tri){
+	for (int i = (index - 1) * map->lines.size() / 4; i < index * map->lines.size() / 4; ++i){
+		for (int j = 1; j < map->lines[i]->points.size() - 1; ++j){
+			tri.p[1] = map->lines[i]->points[j];
+			tri.p[0] = map->lines[tri.p[1]->lineInd]->points[tri.p[1]->leftInd];
+			tri.p[2] = map->lines[tri.p[1]->lineInd]->points[tri.p[1]->rightInd];
+			tri.sort();
+			removeS(tri);
+		}
+	}
+}
+
 void GridSimplifier::simplifyMT(int limit){
 	Triangle tri1;
 	Triangle tri2;
 	Triangle tri3;
 	Triangle tri4;
+	
 	Rect range = gridIndex->range;
 	Rect rect1 = Rect(range.minX, (range.minX + range.maxX) / 2, range.minY, (range.minY + range.maxY) / 2);
 	Rect rect2 = Rect(range.minX, (range.minX + range.maxX) / 2, (range.minY + range.maxY) / 2, range.maxY);
@@ -99,7 +112,13 @@ void GridSimplifier::simplifyMT(int limit){
 	thread t1(&GridSimplifier::simplifyT, this, 0, (gridIndex->divideW - 1) / 2, (gridIndex->divideH - 1) / 2 + 1, gridIndex->divideH - 1, rect2, tri2);
 	thread t2(&GridSimplifier::simplifyT, this, (gridIndex->divideW - 1) / 2 + 1, gridIndex->divideW - 1, (gridIndex->divideH - 1) / 2 + 1, gridIndex->divideH - 1, rect3, tri3);
 	thread t3(&GridSimplifier::simplifyT, this, (gridIndex->divideW - 1) / 2 + 1, gridIndex->divideW - 1, 0, (gridIndex->divideH - 1) / 2, rect4, tri4);
-
+	
+/*
+	thread t0(&GridSimplifier::simplifyTL, this, 1, tri1);
+	thread t1(&GridSimplifier::simplifyTL, this, 2, tri2);
+	thread t2(&GridSimplifier::simplifyTL, this, 3, tri3);
+	thread t3(&GridSimplifier::simplifyTL, this, 4, tri4);
+*/
 	t0.join();
 	t1.join();
 	t2.join();

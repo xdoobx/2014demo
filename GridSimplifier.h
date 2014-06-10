@@ -15,6 +15,7 @@ public:
 	//~Simplifier();
 	void simplify(int limit); // use single processor
 	void simplifyT(int xl, int xr, int yl, int yr, const Rect& rect, Triangle& tri); // in each thread
+	void simplifyTL(int index, Triangle& tri);
 	//void simplify2T(QuadTree* &root1, QuadTree* &root2, const Rect& rect, Triangle& tri);
 	void simplifyMT(int limit); //main precess for multi-thread
 	//void simplify5(int limit);

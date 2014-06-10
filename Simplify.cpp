@@ -12,9 +12,9 @@ int _tmain(int argc, char* argv[])
 
 	//modify DEBUG->Properties->Configration Property->Character set, to "Use Multi-Byte Character Set"
 	{
-		//NaiveSimplifier simp((char*)argv[2], (char*)argv[3]);
+		NaiveSimplifier simp((char*)argv[2], (char*)argv[3]);
 		//VWSimplifier simp((char*)argv[2], (char*)argv[3]);
-		GridSimplifier simp((char*)argv[2], (char*)argv[3]);
+		//GridSimplifier simp((char*)argv[2], (char*)argv[3]);
 		end = clock();
 		cout << "construct: " << end - begin << endl;
 		begin = end;

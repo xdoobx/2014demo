@@ -106,7 +106,7 @@ PointSet* readPoints(string filename)
 
 	parseLong(strpos, &firstp);
 	firstp += 115;
-	points->maxX = points->minX = parseDouble(strpos, &firstp);
+	points->maxX = points->minX = parseDouble(firstp, &firstp);
 	points->maxY = points->minY = parseDouble(++firstp, &firstp);
 
 	while (strpos[0] != '\0'){
