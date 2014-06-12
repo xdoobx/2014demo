@@ -83,7 +83,9 @@
     <ClInclude Include="FileIO.h" />
     <ClInclude Include="GeoUtility.h" />
     <ClInclude Include="GridSimplifier.h" />
+    <ClInclude Include="GridSimplifierM.h" />
     <ClInclude Include="GridTree.h" />
+    <ClInclude Include="GridTreeM.h" />
     <ClInclude Include="QuadTree.h" />
     <ClInclude Include="NaiveSimplifier.h" />
     <ClInclude Include="stdafx.h" />
@@ -93,7 +95,9 @@
   <ItemGroup>
     <ClCompile Include="FileIO.cpp" />
     <ClCompile Include="GridSimplifier.cpp" />
+    <ClCompile Include="GridSimplifierM.cpp" />
     <ClCompile Include="GridTree.cpp" />
+    <ClCompile Include="GridTreeM.cpp" />
     <ClCompile Include="NaiveSimplifier.cpp" />
     <ClCompile Include="QuadTree.cpp" />
     <ClCompile Include="Simplify.cpp" />

@@ -15,12 +15,13 @@ public:
 	double gridH;
 
 	vector<Point*>** grid;
-	//concurrency::concurrent_vector<Point*>** grid; //store points in this grid
-	//GridTree** subTree; //any index should guarantee they have 4 subtree under root node
+
+	//vector<vector<Point*>*>** grid_Multiple;
+	//bool emptyFlag[100][100];//mark if the grid is empty.
 	GridTree(LineSet* map, PointSet* points); //construct qtree with endpoints and constraint points
-	//~QuadTree();
 
 	inline const Point* insert(Point* point);
+	//inline const Point* insertM(Point* point);
 	virtual inline bool hasPointInTri(const Triangle* triangle);
 };
 

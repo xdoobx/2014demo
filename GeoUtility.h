@@ -116,8 +116,8 @@ struct Triangle
 	Triangle(){}
 	Triangle(Point* P1, Point* P2, Point* P3){
 		p[0] = P1;
-		p[1] = P2; 
-		p[2] = P3; 
+		p[1] = P2;
+		p[2] = P3;
 		sort();
 	}
 	double maxX;
@@ -192,6 +192,10 @@ struct Triangle
 	}
 	//whether a point is in this triangle
 	inline bool isInTri(const double& x, const double& y) const {
+
+		if (x > maxX || x<minX || y>maxY || y<minY)
+			return false;
+
 		double prod1 = (x - p[1]->x)*(p[0]->y - y) - (x - p[0]->x)*(p[1]->y - y);
 		double prod2 = (x - p[2]->x)*(p[0]->y - y) - (x - p[0]->x)*(p[2]->y - y);
 		if (prod1 > 0 == prod2 > 0)

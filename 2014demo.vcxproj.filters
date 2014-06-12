@@ -45,6 +45,12 @@
     <ClInclude Include="GridSimplifier.h">
       <Filter>Header Files</Filter>
     </ClInclude>
+    <ClInclude Include="GridSimplifierM.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="GridTreeM.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="stdafx.cpp">
@@ -69,6 +75,12 @@
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="GridSimplifier.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="GridSimplifierM.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="GridTreeM.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
   </ItemGroup>
