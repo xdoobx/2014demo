@@ -12,5 +12,7 @@
 extern LineSet* readLines(string filename);
 extern PointSet* readPoints(string filename);
 extern void writeLines(LineSet* map, string filename, int length);
+extern void readLinesT(LineSetM* map, char *pData, char* endMark, int threadID);
+extern LineSetM* readLinesM(string filename);
 
 #endif

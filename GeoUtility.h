@@ -93,6 +93,25 @@ struct LineSet
 	}*/
 };
 
+
+
+struct LineSetM
+{
+	const char* gmlLineString = ":<gml:LineString srsName=\"EPSG:54004\" xmlns:gml=\"http://www.opengis.net/gml\">";
+	const char* gmlCoordinates = "<gml:coordinates decimal=\".\" cs=\",\" ts=\" \">";
+	const char* endCoordinates = "</gml:coordinates>";
+	const char* endLineString = "</gml:LineString>";
+	vector<Line*> lines[4];
+	double minXs[4];
+	double maxXs[4];
+	double minYs[4];
+	double maxYs[4];
+
+	double minx, maxx, miny, maxy;
+};
+
+
+
 struct Rect
 {
 	double maxX;
