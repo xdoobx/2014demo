@@ -231,11 +231,6 @@ struct Triangle
 			double prod3 = (x - p[2]->x)*(p[1]->y - y) - (x - p[1]->x)*(p[2]->y - y);
 			return prod2 > 0 != prod3 > 0 && (prod1 != 0 || prod3 != 0); // XOR used as !=
 		}
-		/*if (x <= minX || x >= maxX || y <= minY || y >= maxY){
-			return false;
-		}
-		else
-			return true;*/
 	}
 };
 
