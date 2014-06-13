@@ -104,7 +104,7 @@ char* findStart(char* p)
 	p--;//reverse from : to a digit
 
 	//rev back before the ID
-	while (*p > '9' || *p < '0')
+	while (*p <= '9' && *p >= '0')
 	{
 		p--;
 	}
@@ -157,8 +157,8 @@ void readLinesT(LineSetM* map, char *pData, char* endMark, int threadID)
 
 }
 
-
-LineSetM* readLinesM(string filename)
+//threadN is the maximal number of threads.
+LineSetM* readLinesM(string filename, const int threadN)
 {
 	ifstream fin(filename, std::ios::binary | std::ios::ate);
 	char* strpos;
@@ -170,7 +170,7 @@ LineSetM* readLinesM(string filename)
 	fin.read(pdata, length);
 	pdata[length - 1] = '\0';
 
-	int quaterLen = length / 4;
+	int quaterLen = length / threadN;
 
 	LineSetM* map = new LineSetM();
 
@@ -184,6 +184,21 @@ LineSetM* readLinesM(string filename)
 	t1.join();
 	t2.join();
 	t3.join();
+
+
+	map->minx = map->minXs[0];
+	map->maxx = map->maxXs[0];
+	map->miny = map->minYs[0];
+	map->maxy = map->maxYs[0];
+
+	for (int i = 1; i < threadN; i++)
+	{
+		map->minx = (map->minXs[i] < map->minx) ? map->minXs[i] : map->minx;
+		map->maxx = (map->maxXs[i] > map->maxx) ? map->maxXs[i] : map->maxx;
+
+		map->miny = (map->minYs[i] < map->miny) ? map->minYs[i] : map->miny;
+		map->maxy = (map->maxYs[i] > map->maxy) ? map->maxYs[i] : map->maxy;
+	}
 
 	return map;
 }
@@ -319,6 +334,37 @@ void writeLines(LineSet* map, string filename, int length)
 		combine(output, pos, map->endLineString, 17);
 		output[pos++] = '\n';
 	}
+	fwrite(output, sizeof(char), pos, pFile);
+	fclose(pFile);
+}
+
+
+void writeLinesM(LineSetM* map, string filename, int length)
+{
+	FILE * pFile;
+	fopen_s(&pFile, filename.c_str(), "wb");
+	char* output = new char[length];
+	int pos = 0;
+	int ind = 0;
+	for (int k = 0; k < 4; k++)
+	{
+		vector<Line*> lines = map->lines[k];
+		for (int i = 0; i < lines.size(); ++i){
+			combine(output, pos, lines[i]->id);
+			combine(output, pos, map->gmlLineString, 77);
+			combine(output, pos, map->gmlCoordinates, 43);
+			ind = 0;
+			while (ind < lines[i]->points.size()){
+				combine(output, pos, lines[i]->points[ind]->x, ',');
+				combine(output, pos, lines[i]->points[ind]->y, ' ');
+				ind = lines[i]->points[ind]->rightInd;
+			}
+			combine(output, pos, map->endCoordinates, 18);
+			combine(output, pos, map->endLineString, 17);
+			output[pos++] = '\n';
+		}
+	}
+
 	fwrite(output, sizeof(char), pos, pFile);
 	fclose(pFile);
 }

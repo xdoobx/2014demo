@@ -19,10 +19,10 @@ int _tmain(int argc, char* argv[])
 		GridSimplifierM simp((char*)argv[2], (char*)argv[3]);
 
 		end = clock();
-		cout << "IO ane Index: " << end - begin << endl;
+		cout << "IO and Index: " << end - begin << endl;
 		begin = end;
-		//simp.simplifyMT(atoi(argv[1]));
-		simp.simplify(atoi(argv[1]));
+		simp.simplifyMT(atoi(argv[1]));
+		//simp.simplify(atoi(argv[1]));
 		end = clock();
 		cout << "Simplify: " << end - begin << endl;
 		begin = end;

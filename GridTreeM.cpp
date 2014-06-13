@@ -1,22 +1,69 @@
 #include "stdafx.h"
 #include "GridTreeM.h"
+#include <thread>
 
-GridTreeM::GridTreeM(LineSet* map, PointSet* points){
-	range = Rect(map->minX - 0.1, map->maxX + 0.1, map->minY - 0.1, map->maxY + 0.1);
+//GridTreeM::GridTreeM(LineSet* map, PointSet* points){
+//	range = Rect(map->minX - 0.1, map->maxX + 0.1, map->minY - 0.1, map->maxY + 0.1);
+//	divideW = 50;
+//	divideH = 50;
+//	gridW = (range.maxX - range.minX) / divideW;
+//	gridH = (range.maxY - range.minY) / divideH;
+//	
+//	size = 0;
+//	for (int i = 0; i < points->points.size(); ++i)
+//		insertM(points->points[i],0);
+//
+//	for (int i = 0; i < map->lines.size(); ++i){
+//		for (int j = 0; j < map->lines[i]->points.size(); ++j){
+//			insertM(map->lines[i]->points[j], 0);
+//		}
+//	}
+//}
+
+void GridTreeM::insertLines(vector<Line*> lines, int threadId){
+	sizes[threadId] = 0;
+	for (int i = 0; i < lines.size(); ++i){
+		for (int j = 0; j < lines[i]->points.size(); ++j){
+			insertM(lines[i]->points[j], threadId);
+		}
+	}
+}
+
+
+GridTreeM::GridTreeM(LineSetM* map, PointSet* points){
+	range = Rect(map->minx - 0.1, map->maxx + 0.1, map->miny - 0.1, map->maxy + 0.1);
 	divideW = 50;
 	divideH = 50;
 	gridW = (range.maxX - range.minX) / divideW;
 	gridH = (range.maxY - range.minY) / divideH;
-	
-	size = 0;
-	for (int i = 0; i < points->points.size(); ++i)
-		insertM(points->points[i],0);
 
-	for (int i = 0; i < map->lines.size(); ++i){
-		for (int j = 0; j < map->lines[i]->points.size(); ++j){
-			insertM(map->lines[i]->points[j], 0);
-		}
+	for (int i = 0; i <= threadN; i++)
+		sizes[i] = 0;
+
+	gridM = new vector<Point*>**[divideH];
+	for (int i = 0; i < divideH; ++i)
+	{
+		gridM[i] = new vector<Point*>*[divideW];
+
+		for (int j = 0; j < divideW; j++)
+			gridM[i][j] = new vector<Point*>[5];
 	}
+
+	//insert the points
+	for (int i = 0; i < points->points.size(); ++i)
+		insertM(points->points[i], threadN);
+
+	//insert the lines in parallel
+	thread t0(&GridTreeM::insertLines, this, map->lines[0], 0);
+	thread t1(&GridTreeM::insertLines, this, map->lines[1], 1);
+	thread t2(&GridTreeM::insertLines, this, map->lines[2], 2);
+	thread t3(&GridTreeM::insertLines, this, map->lines[3], 3);
+
+	t0.join();
+	t1.join();
+	t2.join();
+	t3.join();
+
 }
 
 const Point* GridTreeM::insertM(Point* newPoint,int tid){
@@ -24,7 +71,7 @@ const Point* GridTreeM::insertM(Point* newPoint,int tid){
 	int gridY = (newPoint->y - range.minY) / gridH;
 	//gridM[gridX][gridY][tid].push_back(newPoint); // even though this point overlays a previous point
 	gridM[gridX][gridY][tid].push_back(newPoint); // even though this point overlays a previous point
-	++size;
+	++sizes[tid];
 	return newPoint;
 }
 
@@ -36,8 +83,8 @@ bool GridTreeM::hasPointInTri(const Triangle* triangle){
 	for (int i = gridMinX; i <= gridMaxX; ++i){
 		for (int j = gridMinY; j <= gridMaxY; ++j){
 
-			//int vecN = threadN + 1;
-			for (int l = 0; l < 4; l++)
+			int vecN = threadN + 1;
+			for (int l = 0; l < vecN; l++)
 			for (int k = 0; k < gridM[i][j][l].size(); ++k)
 			{
 				if (gridM[i][j][l][k]->kept && triangle->isInTri(gridM[i][j][l][k]->x, gridM[i][j][l][k]->y))
@@ -49,6 +96,16 @@ bool GridTreeM::hasPointInTri(const Triangle* triangle){
 	return false;
 }
 
+
+int GridTreeM::pointNumber()
+{
+	int sum = 0;
+	for (int i = 0; i < threadN + 1; i++)
+	{
+		sum += sizes[i];
+	}
+	return sum;
+}
 
 
 //bool GridTreeM::hasPointInTri(const Triangle* triangle){

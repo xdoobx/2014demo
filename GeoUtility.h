@@ -47,16 +47,6 @@ struct Line
 	vector<int> shareEnd21;
 	vector<int> shareEnd22;
 	vector<int> shareEnd;
-
-	/*~Line(){
-		delete shareEnd11;
-		delete shareEnd12;
-		delete shareEnd21;
-		delete shareEnd22;
-		delete shareEnd;
-		for (int i = 0; i < points.size(); ++i)
-			delete points[i];
-	}*/
 };
 
 struct LineSet
@@ -97,17 +87,28 @@ struct LineSet
 
 struct LineSetM
 {
+	const static int threadN = 4;
 	const char* gmlLineString = ":<gml:LineString srsName=\"EPSG:54004\" xmlns:gml=\"http://www.opengis.net/gml\">";
 	const char* gmlCoordinates = "<gml:coordinates decimal=\".\" cs=\",\" ts=\" \">";
 	const char* endCoordinates = "</gml:coordinates>";
 	const char* endLineString = "</gml:LineString>";
-	vector<Line*> lines[4];
-	double minXs[4];
-	double maxXs[4];
-	double minYs[4];
-	double maxYs[4];
+	vector<Line*> lines[threadN];
+	double minXs[threadN];
+	double maxXs[threadN];
+	double minYs[threadN];
+	double maxYs[threadN];
 
 	double minx, maxx, miny, maxy;
+
+
+	int linesNumber()
+	{
+		int sum = 0;
+		for (int i = 0; i < threadN; i++){
+			sum += lines[i].size();
+		}
+		return sum;
+	}
 };
 
 
