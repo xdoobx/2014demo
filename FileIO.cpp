@@ -169,6 +169,7 @@ LineSetM* readLinesM(string filename, const int threadN)
 	fin.seekg(0, ios::beg);
 	fin.read(pdata, length);
 	pdata[length - 1] = '\0';
+	fin.close();
 
 	int quaterLen = length / threadN;
 

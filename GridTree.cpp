@@ -3,8 +3,11 @@
 
 GridTree::GridTree(LineSet* map, PointSet* points){
 	range = Rect(map->minX - 0.1, map->maxX + 0.1, map->minY - 0.1, map->maxY + 0.1);
-	divideW = 80;
-	divideH = 80;
+	//divideW = 80;
+	//divideH = 80;
+
+	divideW = divideH = sqrt(4 * map->lines.size());
+
 	gridW = (range.maxX - range.minX) / divideW;
 	gridH = (range.maxY - range.minY) / divideH;
 	//grid = new concurrency::concurrent_vector<Point*>*[divideW];

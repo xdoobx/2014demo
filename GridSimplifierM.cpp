@@ -18,12 +18,17 @@
 //}
 
 GridSimplifierM::GridSimplifierM(char* lineFile, char* pointFile){
+	//clock_t begin, end;
+	//begin = clock();
 	map = readLinesM(lineFile,threadN);
 	points = readPoints(pointFile);
-	//	clock_t begin = clock();
+	//end = clock();
+	//cout << "IO: " << end - begin << endl;
+
+	 //begin = clock();
 	gridIndex = new GridTreeM(map, points);
-	//	clock_t end = clock();
-	//	cout << "index: " << end - begin << endl;
+	 //end = clock();
+	//cout << "index: " << end - begin << endl;
 }
 
 

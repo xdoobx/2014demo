@@ -3,8 +3,12 @@
 #include "GridSimplifier.h"
 
 GridSimplifier::GridSimplifier(char* lineFile, char* pointFile){
+
+	clock_t beg = clock();
 	map = readLines(lineFile);
 	points = readPoints(pointFile);
+	clock_t end = clock();
+	cout <<"IO "<< end - beg << endl;
 	gridIndex = new GridTree(map, points);
 
 	orig_size = gridIndex->size;

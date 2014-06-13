@@ -29,11 +29,20 @@ void GridTreeM::insertLines(vector<Line*> lines, int threadId){
 	}
 }
 
+int GridTreeM::InferGridNumber(int lineN)
+{
+	int gridRow = 4 * lineN;
+	return sqrt(gridRow);
+}
+
 
 GridTreeM::GridTreeM(LineSetM* map, PointSet* points){
 	range = Rect(map->minx - 0.1, map->maxx + 0.1, map->miny - 0.1, map->maxy + 0.1);
-	divideW = 50;
-	divideH = 50;
+	//divideW = 45;
+	//divideH = 45;
+
+	divideH = divideW = sqrt(4*map->linesNumber());
+
 	gridW = (range.maxX - range.minX) / divideW;
 	gridH = (range.maxY - range.minY) / divideH;
 
@@ -51,7 +60,7 @@ GridTreeM::GridTreeM(LineSetM* map, PointSet* points){
 
 	//insert the points
 	for (int i = 0; i < points->points.size(); ++i)
-		insertM(points->points[i], threadN);
+		insertM(points->points[i], 0);
 
 	//insert the lines in parallel
 	thread t0(&GridTreeM::insertLines, this, map->lines[0], 0);
@@ -83,7 +92,8 @@ bool GridTreeM::hasPointInTri(const Triangle* triangle){
 	for (int i = gridMinX; i <= gridMaxX; ++i){
 		for (int j = gridMinY; j <= gridMaxY; ++j){
 
-			int vecN = threadN + 1;
+			//int vecN = threadN + 1;
+			int vecN = threadN;
 			for (int l = 0; l < vecN; l++)
 			for (int k = 0; k < gridM[i][j][l].size(); ++k)
 			{
