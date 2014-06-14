@@ -19,7 +19,7 @@ public:
 	GridTree(LineSet* map, PointSet* points); //construct qtree with endpoints and constraint points
 
 	inline const Point* insert(Point* point);
-	inline bool hasPointInTri(const Triangle* triangle);
+	virtual inline bool hasPointInTri(const Triangle* triangle);
 	inline vector<Point*> pointsInTri(const Triangle* triangle);
 };
 

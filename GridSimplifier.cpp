@@ -1,6 +1,9 @@
 
 #include "stdafx.h"
+#include <iostream>
+#include "FileIO.h"
 #include "GridSimplifier.h"
+using namespace std;
 
 GridSimplifier::GridSimplifier(char* lineFile, char* pointFile){
 
