@@ -59,7 +59,7 @@ LineSet* readLines(string filename)
 		Line* line = new Line;
 		line->id = parseLong(strpos, &strpos);
 		strpos += 120;
-		while (strpos[0] != '<'){
+		while (strpos[0] != '<' && strpos[0] != '/'){
 			Point* point = new Point;
 			point->x = parseDouble(strpos, &strpos);
 			++strpos;
