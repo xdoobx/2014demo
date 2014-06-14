@@ -47,16 +47,6 @@ struct Line
 	vector<int> shareEnd21;
 	vector<int> shareEnd22;
 	vector<int> shareEnd;
-
-	/*~Line(){
-		delete shareEnd11;
-		delete shareEnd12;
-		delete shareEnd21;
-		delete shareEnd22;
-		delete shareEnd;
-		for (int i = 0; i < points.size(); ++i)
-			delete points[i];
-	}*/
 };
 
 struct LineSet
@@ -93,6 +83,36 @@ struct LineSet
 	}*/
 };
 
+
+
+struct LineSetM
+{
+	const static int threadN = 4;
+	const char* gmlLineString = ":<gml:LineString srsName=\"EPSG:54004\" xmlns:gml=\"http://www.opengis.net/gml\">";
+	const char* gmlCoordinates = "<gml:coordinates decimal=\".\" cs=\",\" ts=\" \">";
+	const char* endCoordinates = "</gml:coordinates>";
+	const char* endLineString = "</gml:LineString>";
+	vector<Line*> lines[threadN];
+	double minXs[threadN];
+	double maxXs[threadN];
+	double minYs[threadN];
+	double maxYs[threadN];
+
+	double minx, maxx, miny, maxy;
+
+
+	int linesNumber()
+	{
+		int sum = 0;
+		for (int i = 0; i < threadN; i++){
+			sum += lines[i].size();
+		}
+		return sum;
+	}
+};
+
+
+
 struct Rect
 {
 	double maxX;
@@ -116,8 +136,8 @@ struct Triangle
 	Triangle(){}
 	Triangle(Point* P1, Point* P2, Point* P3){
 		p[0] = P1;
-		p[1] = P2; 
-		p[2] = P3; 
+		p[1] = P2;
+		p[2] = P3;
 		sort();
 	}
 	double maxX;
@@ -192,6 +212,10 @@ struct Triangle
 	}
 	//whether a point is in this triangle
 	inline bool isInTri(const double& x, const double& y) const {
+
+		//if (x > maxX || x<minX || y>maxY || y<minY)
+		//	return false;
+
 		double prod1 = (x - p[1]->x)*(p[0]->y - y) - (x - p[0]->x)*(p[1]->y - y);
 		double prod2 = (x - p[2]->x)*(p[0]->y - y) - (x - p[0]->x)*(p[2]->y - y);
 		if (prod1 > 0 == prod2 > 0)
@@ -207,11 +231,6 @@ struct Triangle
 			double prod3 = (x - p[2]->x)*(p[1]->y - y) - (x - p[1]->x)*(p[2]->y - y);
 			return prod2 > 0 != prod3 > 0 && (prod1 != 0 || prod3 != 0); // XOR used as !=
 		}
-		/*if (x <= minX || x >= maxX || y <= minY || y >= maxY){
-			return false;
-		}
-		else
-			return true;*/
 	}
 };
 

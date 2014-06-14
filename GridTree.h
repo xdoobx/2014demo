@@ -1,8 +1,9 @@
 #ifndef _KDTREE_H_
 #define _KDTREE_H_
 
-#include "QuadTree.h"
 #include <thread>
+#include <vector>
+#include "GeoUtility.h"
 
 class GridTree{
 private:
@@ -15,13 +16,11 @@ public:
 	double gridH;
 
 	vector<Point*>** grid;
-	//concurrency::concurrent_vector<Point*>** grid; //store points in this grid
-	//GridTree** subTree; //any index should guarantee they have 4 subtree under root node
 	GridTree(LineSet* map, PointSet* points); //construct qtree with endpoints and constraint points
-	//~QuadTree();
 
 	inline const Point* insert(Point* point);
-	virtual inline bool hasPointInTri(const Triangle* triangle);
+	inline bool hasPointInTri(const Triangle* triangle);
+	inline vector<Point*> pointsInTri(const Triangle* triangle);
 };
 
 #endif
