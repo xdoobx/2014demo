@@ -267,6 +267,10 @@ PointSet* readPoints(string filename)
 
 
 void combine(char* output, int& pos, long id){
+	if (id == 0){
+		output[pos] = '0';
+		return;
+	}
 	int p = 10000; //limitation, id should not be larger than 10000
 	int digit;
 	while (id / p < 1)
