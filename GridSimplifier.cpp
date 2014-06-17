@@ -134,10 +134,10 @@ void GridSimplifier::simplifyMT(int limit){
 	Triangle tri3;
 	Triangle tri4;
 
-	thread t0(&GridSimplifier::simplifyTL, this, 0, tri1);
-	thread t1(&GridSimplifier::simplifyTL, this, 1, tri2);
-	thread t2(&GridSimplifier::simplifyTL, this, 2, tri3);
-	thread t3(&GridSimplifier::simplifyTL, this, 3, tri4);
+	thread t0(&GridSimplifier::simplifyTL, this, 1, tri1);
+	thread t1(&GridSimplifier::simplifyTL, this, 2, tri2);
+	thread t2(&GridSimplifier::simplifyTL, this, 3, tri3);
+	thread t3(&GridSimplifier::simplifyTL, this, 4, tri4);
 
 	t0.join();
 	t1.join();

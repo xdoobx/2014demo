@@ -218,18 +218,18 @@ struct Triangle
 
 		double prod1 = (x - p[1]->x)*(p[0]->y - y) - (x - p[0]->x)*(p[1]->y - y);
 		double prod2 = (x - p[2]->x)*(p[0]->y - y) - (x - p[0]->x)*(p[2]->y - y);
-		if (prod1 > 0 == prod2 > 0)
-			if((prod1 != 0) == (prod2 != 0))
-				return false;
-			else{
-				if ((x - p[2]->x)*(p[1]->y - y) == (x - p[1]->x)*(p[2]->y - y))
-					return false;
-				else
-					return true;
-			}
+		if (prod1 > 0 && prod2 > 0 || prod1 < 0 && prod2 < 0 || prod1 == 0 && prod2 == 0)
+			return false;
 		else{
 			double prod3 = (x - p[2]->x)*(p[1]->y - y) - (x - p[1]->x)*(p[2]->y - y);
-			return prod2 > 0 != prod3 > 0 && (prod1 != 0 || prod3 != 0); // XOR used as !=
+			if (prod3 == 0)
+				return prod1 != 0 && prod2 != 0;
+			if (prod2 > 0 && prod3 > 0 || prod2 < 0 && prod3 < 0)
+				return false;
+			if (prod2 != 0)
+				return true;
+			else
+				return prod1 < 0 && prod3 > 0 || prod1 > 0 && prod3 < 0;
 		}
 	}
 };
