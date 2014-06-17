@@ -229,7 +229,7 @@ struct Triangle
 			if (prod2 != 0)
 				return true;
 			else
-				return prod1 < 0 && prod3 > 0 || prod1 > 0 && prod3 < 0;
+				return prod1 < 0 && prod3 < 0 || prod1 > 0 && prod3 > 0;
 		}
 	}
 };
