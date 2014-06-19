@@ -293,6 +293,7 @@ void combine(char* output, int& pos, double number, char sep){
 	else if (number == 0){
 		output[pos++] = '0';
 		output[pos++] = sep;
+		return;
 	}
 	while (number / p < 1)
 		p /= 10;

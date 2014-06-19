@@ -215,9 +215,10 @@ struct Triangle
 
 		//if (x > maxX || x<minX || y>maxY || y<minY)
 		//	return false;
-
+		
 		double prod1 = (x - p[1]->x)*(p[0]->y - y) - (x - p[0]->x)*(p[1]->y - y);
 		double prod2 = (x - p[2]->x)*(p[0]->y - y) - (x - p[0]->x)*(p[2]->y - y);
+		
 		if (prod1 > 0 && prod2 > 0 || prod1 < 0 && prod2 < 0 || prod1 == 0 && prod2 == 0)
 			return false;
 		else{
@@ -231,6 +232,7 @@ struct Triangle
 			else
 				return prod1 < 0 && prod3 < 0 || prod1 > 0 && prod3 > 0;
 		}
+		
 	}
 };
 
