@@ -263,22 +263,34 @@ struct Polygon{
 				maxY = p[i]->y;
 		}
 	}
-	inline bool isInPolygon(const double& x, const double& y) const{ //assumption: no point is on the line of any horizontal polygon segment
-		int count = 0;
+	inline bool isInPolygon(const double& x, const double& y) const{
+		double count = 0;
 		for (int i = 0; i < size; ++i){
 			if (p[i]->x == x && p[i]->y == y)
 				return false;
 			int next = (i + 1) % size;
 			if (p[i]->y == p[next]->y){
-				if (p[i]->x < x != p[next]->x < x)
+				if (p[i]->y == y && p[i]->x < x != p[next]->x < x)
 					return true;
+				else
+					continue;
 			}
 			else if (p[i]->y < p[next]->y){
 				if (p[i]->y > y || p[next]->y < y)
 					continue;
+				else if (p[i]->y == y && p[i]->x > x || p[next]->y == y && p[next]->x > x){
+					count += 0.5;
+					continue;
+				}
 			}
-			else if (p[i]->y < y || p[next]->y > y)
-				continue;
+			else{
+				if (p[i]->y < y || p[next]->y > y)
+					continue;
+				else if (p[i]->y == y && p[i]->x > x || p[next]->y == y && p[next]->x > x){
+					count -= 0.5;
+					continue;
+				}
+			}
 			if (p[i]->x < p[next]->x){
 				if (p[next]->x < x)
 					continue;
@@ -303,7 +315,7 @@ struct Polygon{
 			else
 				++count;
 		}
-		if (count % 2 == 0)
+		if (int(count) % 2 == 0)
 			return false;
 		else
 			return true;
