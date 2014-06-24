@@ -29,6 +29,7 @@ public:
 	inline void insertLines(vector<Line*> lines, int threadId);
 	inline const Point* insertM(Point* point, int tid);
 	virtual inline bool hasPointInTri(const Triangle* triangle);
+	virtual inline bool hasPointInPoly(const Polygon* polygon);
 
 	int pointNumber();
 };

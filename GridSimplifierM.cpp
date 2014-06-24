@@ -34,6 +34,19 @@ bool GridSimplifierM::removeS(Triangle &triangle, int threadId){
 		return false;
 }
 
+bool GridSimplifierM::removeS(Polygon &poly, int threadId){
+	if (!gridIndex->hasPointInPoly(&poly)){
+		for (int i = 1; i < poly.size; ++i)
+			poly.p[i]->kept = false; //set point as removed
+		poly.p[poly.size-1]->leftInd = poly.p[0]->pointInd;
+		poly.p[0]->rightInd = poly.p[poly.size - 1]->pointInd;
+		gridIndex->sizes[threadId] -= poly.size - 2; //remove point from index
+		map->lines[threadId][poly.p[0]->lineInd]->kept -= poly.size - 2;
+		return true;
+	}
+	else
+		return false;
+}
 
 void GridSimplifierM::simplifyT(vector<Line*> lines, Triangle& tri, int threadId){
 	for (int i = 0; i<lines.size(); ++i){
@@ -47,6 +60,19 @@ void GridSimplifierM::simplifyT(vector<Line*> lines, Triangle& tri, int threadId
 	}
 }
 
+void GridSimplifierM::simplifyTP(vector<Line*> lines, Polygon& poly, int threadId){
+	for (int i = 0; i<lines.size(); ++i){
+		for (int j = 1; j < (lines[i]->points.size() - 1)/3; ++j){
+			poly.p[1] = lines[i]->points[j * 3 - 2];
+			poly.p[2] = lines[i]->points[j * 3 - 1];
+			poly.p[3] = lines[i]->points[j * 3];
+			poly.p[0] = lines[i]->points[poly.p[1]->leftInd];
+			poly.p[4] = lines[i]->points[poly.p[3]->rightInd];
+			poly.getRange();
+			removeS(poly, threadId);
+		}
+	}
+}
 
 void GridSimplifierM::simplifyMT(int limit){
 	Triangle tri1;
@@ -64,6 +90,24 @@ void GridSimplifierM::simplifyMT(int limit){
 	t2.join();
 	t3.join();
 
+}
+
+void GridSimplifierM::simplifyMTP(int limit){
+	Polygon poly1(5, new Point*[5]);
+	Polygon poly2(5, new Point*[5]);
+	Polygon poly3(5, new Point*[5]);
+	Polygon poly4(5, new Point*[5]);
+
+
+	thread t0(&GridSimplifierM::simplifyTP, this, map->lines[0], poly1, 0);
+	thread t1(&GridSimplifierM::simplifyTP, this, map->lines[1], poly2, 1);
+	thread t2(&GridSimplifierM::simplifyTP, this, map->lines[2], poly3, 2);
+	thread t3(&GridSimplifierM::simplifyTP, this, map->lines[3], poly4, 3);
+
+	t0.join();
+	t1.join();
+	t2.join();
+	t3.join();
 }
 
 void GridSimplifierM::wirteFile(string writeFile) {

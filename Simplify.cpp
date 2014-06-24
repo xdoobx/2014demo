@@ -21,10 +21,11 @@ int _tmain(int argc, char* argv[])
 		end = clock();
 		cout << "construct: " << end - begin << endl;
 		begin = end;
-		simp.simplifyMT(atoi(argv[1]));
+		//simp.simplifyMT(atoi(argv[1]));
 		//simp.simplify(atoi(argv[1]));
 		//simp.simplifyNon(atoi(argv[1]));
 		//simp.simplifyIgn(atoi(argv[1]));
+		simp.simplifyMTP(atoi(argv[1]));
 		end = clock();
 		cout << "Simplify: " << end - begin << endl;
 		begin = end;
