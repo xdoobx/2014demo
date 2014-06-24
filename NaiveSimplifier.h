@@ -12,10 +12,13 @@ protected:
 	int orig_size; //number of unique points in line set
 	inline bool removeP(Triangle &triangle); //remove a point in the given triangle
 	inline bool removeS(Triangle &triangle); //simple version of remove point
+	inline bool removeNon(Triangle &triangle);
 public:
 	NaiveSimplifier(char* lineFile, char* pointFile);
 	//~Simplifier();
 	void simplify(int limit); // use single processor
+	void simplifyNon(int limit);
+	void simplifyIgn(int limit);
 	void simplifyT(QuadTree* &root, const Rect& rect, Triangle& tri); // in each thread
 	void simplify2T(QuadTree* &root1, QuadTree* &root2, const Rect& rect, Triangle& tri);
 	void simplifyMT(int limit); //main precess for multi-thread

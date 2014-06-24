@@ -93,18 +93,36 @@ bool NaiveSimplifier::removeS(Triangle& triangle){
 	return false;
 }
 
+bool NaiveSimplifier::removeNon(Triangle &triangle){
+	for (int i = 0; i < map->lines.size(); ++i){
+		for (int j = 0; j < map->lines[i]->points.size(); ++j){
+			if (map->lines[i]->points[j]->kept && triangle.isInTri(map->lines[i]->points[j]->x, map->lines[i]->points[j]->y))
+				return false;
+		}
+	}
+	for (int i = 0; i < points->points.size(); ++i){
+		if (triangle.isInTri(points->points[i]->x, points->points[i]->y))
+			return false;
+	}
+	--map->lines[triangle.p[1]->lineInd]->kept; //line point number decrease
+	triangle.p[1]->kept = false; //set point as removed
+	triangle.p[2]->leftInd = triangle.p[0]->pointInd;
+	triangle.p[0]->rightInd = triangle.p[2]->pointInd;
+	return true;
+}
+
 void NaiveSimplifier::simplify(int limit){
 	Triangle triangle;
 	int last;
 	int removed = 1, total_removed = 0;
-	while(total_removed < limit && removed != 0){ //repeat the process if more points need to be removed
+	while (total_removed < limit && removed != 0){ //repeat the process if more points need to be removed
 		for (int i = 0; i < map->lines.size(); ++i){ //for each line
 			triangle.p[1] = map->lines[i]->points[0];
 			last = map->lines[i]->points.size();
 			if (map->lines[i]->points[last - 1]->leftInd == 0)
 				continue; // it is already a segment
 			triangle.p[2] = map->lines[i]->points[triangle.p[1]->rightInd];
-			if (*(triangle.p[1]) == map->lines[i]->points[last-1]){ //if the line is a cycle
+			if (*(triangle.p[1]) == map->lines[i]->points[last - 1]){ //if the line is a cycle
 				while (triangle.p[2]->rightInd < last){
 					if (map->lines[i]->kept == 4) //leave at least 4 points
 						break;
@@ -128,6 +146,55 @@ void NaiveSimplifier::simplify(int limit){
 		removed = orig_size - qTreeLine->size;
 		total_removed += removed;
 		orig_size = qTreeLine->size;
+	}
+}
+
+void NaiveSimplifier::simplifyNon(int limit){
+	Triangle triangle;
+	int last;
+	int removed = 1, total_removed = 0;
+	while (total_removed < limit && removed != 0){ //repeat the process if more points need to be removed
+		for (int i = 0; i < map->lines.size(); ++i){ //for each line
+			triangle.p[1] = map->lines[i]->points[0];
+			last = map->lines[i]->points.size();
+			if (map->lines[i]->points[last - 1]->leftInd == 0)
+				continue; // it is already a segment
+			triangle.p[2] = map->lines[i]->points[triangle.p[1]->rightInd];
+			if (*(triangle.p[1]) == map->lines[i]->points[last - 1]){ //if the line is a cycle
+				while (triangle.p[2]->rightInd < last){
+					if (map->lines[i]->kept == 4) //leave at least 4 points
+						break;
+					triangle.p[1] = triangle.p[2];
+					triangle.p[0] = map->lines[i]->points[triangle.p[1]->leftInd];
+					triangle.p[2] = map->lines[i]->points[triangle.p[1]->rightInd];
+					triangle.sort();
+					removeNon(triangle);
+				}
+			}
+			else{
+				while (triangle.p[2]->rightInd < last){
+					triangle.p[1] = triangle.p[2];
+					triangle.p[0] = map->lines[i]->points[triangle.p[1]->leftInd];
+					triangle.p[2] = map->lines[i]->points[triangle.p[1]->rightInd];
+					triangle.sort();
+					removeNon(triangle); //can I remove the current point?
+				}
+			}
+		}
+		removed = orig_size - qTreeLine->size;
+		total_removed += removed;
+		orig_size = qTreeLine->size;
+	}
+}
+
+void NaiveSimplifier::simplifyIgn(int limit){
+	for (int i = 0; i < map->lines.size(); ++i){
+		for (int j = 1; j < map->lines[i]->points.size()-1; ++j){
+			--map->lines[i]->kept; //line point number decrease
+			map->lines[i]->points[j]->kept = false; //set point as removed
+			map->lines[i]->points[map->lines[i]->points[j]->rightInd]->leftInd = map->lines[i]->points[j]->leftInd;
+			map->lines[i]->points[map->lines[i]->points[j]->leftInd]->rightInd = map->lines[i]->points[j]->rightInd;
+		}
 	}
 }
 

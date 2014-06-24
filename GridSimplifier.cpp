@@ -28,6 +28,7 @@ bool GridSimplifier::removeS(Triangle &triangle){
 		triangle.p[2]->leftInd = triangle.p[0]->pointInd;
 		triangle.p[0]->rightInd = triangle.p[2]->pointInd;
 		--gridIndex->size; //remove point from index
+		--map->lines[triangle.p[1]->lineInd]->kept;
 		return true;
 	}
 	else

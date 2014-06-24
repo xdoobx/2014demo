@@ -21,12 +21,13 @@ GridSimplifierM::GridSimplifierM(char* lineFile, char* pointFile){
 
 
 
-bool GridSimplifierM::removeS(Triangle &triangle, int threaId){
+bool GridSimplifierM::removeS(Triangle &triangle, int threadId){
 	if (!gridIndex->hasPointInTri(&triangle)){
 		triangle.p[1]->kept = false; //set point as removed
 		triangle.p[2]->leftInd = triangle.p[0]->pointInd;
 		triangle.p[0]->rightInd = triangle.p[2]->pointInd;
-		--gridIndex->sizes[threaId]; //remove point from index
+		--gridIndex->sizes[threadId]; //remove point from index
+		--map->lines[threadId][triangle.p[1]->lineInd]->kept;
 		return true;
 	}
 	else

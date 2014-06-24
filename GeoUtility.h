@@ -236,4 +236,68 @@ struct Triangle
 	}
 };
 
+struct Polygon{
+	int size;
+	Point** p;
+	Polygon(){}
+	Polygon(int Size, Point** points){
+		size = Size;
+		p = points;
+	}
+	double maxX;
+	double minX;
+	double maxY;
+	double minY;
+
+	inline void getRange(){
+		minX = maxX = p[0]->x;
+		minY = maxY = p[0]->y;
+		for (int i = 1; i < size; ++i){
+			if (minX > p[i]->x)
+				minX = p[i]->x;
+			if (maxX < p[i]->x)
+				maxX = p[i]->x;
+			if (minY > p[i]->y)
+				minY = p[i]->y;
+			if (maxY < p[i]->y)
+				maxY = p[i]->y;
+		}
+	}
+	inline bool isInPolygon(const double& x, const double& y) const{
+		int count = 0;
+		for (int i = 0; i < size - 1; ++i){
+			if (p[i]->x < p[i + 1]->x){
+				if (p[i + 1]->x <= x)
+					continue;
+				else if (p[i]->x >= x){
+					++count;
+					continue;
+				}
+			}
+			else{
+				if (p[i]->x <= x)
+					continue;
+				else if (p[i + 1]->y >= y){
+					++count;
+					continue;
+				}
+			}
+			if (p[i]->y < p[i + 1]->y){
+				if (p[i]->y >= y || p[i + 1]->y <= y)
+					continue;
+			}
+			else if (p[i]->y <= y || p[i + 1]->y >= y)
+				continue;
+			if ((p[i + 1]->x*p[i]->y - p[i + 1]->x*y - p[i]->x*p[i + 1]->y + p[i]->x*y) <= x*(p[i]->y - p[i + 1]->y))
+				continue;
+			else
+				++count;
+		}
+		if (count % 2 == 0)
+			return false;
+		else
+			return true;
+	}
+};
+
 #endif

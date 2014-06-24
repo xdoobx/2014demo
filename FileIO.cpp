@@ -43,18 +43,20 @@ LineSet* readLines(string filename)
 	char* strpos;
 	char* firstp;
 
+	clock_t read_begin = clock();
 	vector<char> vfile(fin.tellg());
 	fin.seekg(0, ios::beg);
 	fin.read(vfile.data(), vfile.size());
 	vfile.push_back('\0');
 	strpos = vfile.data();
+	cout << "Read line file cost: " << clock() - read_begin << endl;
 
 	parseLong(strpos, &firstp);
 	firstp += 120;
 	map->maxX = map->minX = parseDouble(firstp, &firstp);
 	map->maxY = map->minY = parseDouble(++firstp, &firstp);
 
-	//clock_t begin = clock();
+	clock_t begin = clock();
 	while (strpos[0] != '\0'){
 		Line* line = new Line;
 		line->id = parseLong(strpos, &strpos);
@@ -87,7 +89,7 @@ LineSet* readLines(string filename)
 		strpos += 36;
 		map->lines.push_back(line);
 	}
-	//cout << "construct line cost: " << clock() - begin << endl;
+	cout << "construct line cost: " << clock() - begin << endl;
 	return map;
 }
 
@@ -235,6 +237,7 @@ PointSet* readPoints(string filename)
 	points->maxX = points->minX = parseDouble(firstp, &firstp);
 	points->maxY = points->minY = parseDouble(++firstp, &firstp);
 
+	clock_t begin = clock();
 	while (strpos[0] != '\0'){
 		Point* point = new Point;
 		parseLong(strpos, &strpos);
@@ -257,6 +260,7 @@ PointSet* readPoints(string filename)
 		strpos += 31;
 		points->points.push_back(point);
 	}
+	cout << "construct points cost: " << clock() - begin << endl;
 	return points;
 }
 
