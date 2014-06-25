@@ -38,7 +38,7 @@ bool GridSimplifierM::removeS(Polygon &poly, int threadId){
 	if (!gridIndex->hasPointInPoly(&poly)){
 		for (int i = 1; i < poly.size; ++i)
 			poly.p[i]->kept = false; //set point as removed
-		poly.p[poly.size-1]->leftInd = poly.p[0]->pointInd;
+		poly.p[poly.size - 1]->leftInd = poly.p[0]->pointInd;
 		poly.p[0]->rightInd = poly.p[poly.size - 1]->pointInd;
 		gridIndex->sizes[threadId] -= poly.size - 2; //remove point from index
 		map->lines[threadId][poly.p[0]->lineInd]->kept -= poly.size - 2;
@@ -62,14 +62,21 @@ void GridSimplifierM::simplifyT(vector<Line*> lines, Triangle& tri, int threadId
 
 void GridSimplifierM::simplifyTP(vector<Line*> lines, Polygon& poly, int threadId){
 	for (int i = 0; i<lines.size(); ++i){
-		for (int j = 1; j < (lines[i]->points.size() - 1)/3; ++j){
-			poly.p[1] = lines[i]->points[j * 3 - 2];
-			poly.p[2] = lines[i]->points[j * 3 - 1];
-			poly.p[3] = lines[i]->points[j * 3];
+		for (int j = 1; j < lines[i]->points.size()/2; ++j){
+			poly.p[1] = lines[i]->points[j * 2 - 1];
+			poly.p[2] = lines[i]->points[j * 2];
 			poly.p[0] = lines[i]->points[poly.p[1]->leftInd];
-			poly.p[4] = lines[i]->points[poly.p[3]->rightInd];
+			poly.p[3] = lines[i]->points[poly.p[2]->rightInd];
 			poly.getRange();
 			removeS(poly, threadId);
+		}
+		if (lines[i]->points.size() % 2 == 1){
+			Triangle tri;
+			tri.p[1] = lines[i]->points[lines[i]->points.size()-2];
+			tri.p[0] = lines[i]->points[tri.p[1]->leftInd];
+			tri.p[2] = lines[i]->points[tri.p[1]->rightInd];
+			tri.sort();
+			removeS(tri, threadId);
 		}
 	}
 }
@@ -93,17 +100,17 @@ void GridSimplifierM::simplifyMT(int limit){
 }
 
 void GridSimplifierM::simplifyMTP(int limit){
-	Polygon poly1(5, new Point*[5]);
-	Polygon poly2(5, new Point*[5]);
-	Polygon poly3(5, new Point*[5]);
-	Polygon poly4(5, new Point*[5]);
+	Polygon poly1(4, new Point*[4]);
+	Polygon poly2(4, new Point*[4]);
+	Polygon poly3(4, new Point*[4]);
+	Polygon poly4(4, new Point*[4]);
 
 
 	thread t0(&GridSimplifierM::simplifyTP, this, map->lines[0], poly1, 0);
 	thread t1(&GridSimplifierM::simplifyTP, this, map->lines[1], poly2, 1);
 	thread t2(&GridSimplifierM::simplifyTP, this, map->lines[2], poly3, 2);
 	thread t3(&GridSimplifierM::simplifyTP, this, map->lines[3], poly4, 3);
-
+	
 	t0.join();
 	t1.join();
 	t2.join();

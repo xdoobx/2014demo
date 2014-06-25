@@ -264,11 +264,15 @@ struct Polygon{
 		}
 	}
 	inline bool isInPolygon(const double& x, const double& y) const{
+		if (x < minX || x > maxX || y < minY || y > maxY)
+			return false;
 		double count = 0;
+		if (p[0]->x == x && p[0]->y == y)
+			return false;
 		for (int i = 0; i < size; ++i){
-			if (p[i]->x == x && p[i]->y == y)
-				return false;
 			int next = (i + 1) % size;
+			if (p[next]->x == x && p[next]->y == y)
+				return false;
 			if (p[i]->y == p[next]->y){
 				if (p[i]->y == y && p[i]->x < x != p[next]->x < x)
 					return true;
