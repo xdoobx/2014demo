@@ -36,7 +36,7 @@ bool GridSimplifierM::removeS(Triangle &triangle, int threadId){
 
 bool GridSimplifierM::removeS(Polygon &poly, int threadId){
 	if (!gridIndex->hasPointInPoly(&poly)){
-		for (int i = 1; i < poly.size; ++i)
+		for (int i = 1; i < poly.size-1; ++i)
 			poly.p[i]->kept = false; //set point as removed
 		poly.p[poly.size - 1]->leftInd = poly.p[0]->pointInd;
 		poly.p[0]->rightInd = poly.p[poly.size - 1]->pointInd;
@@ -62,7 +62,9 @@ void GridSimplifierM::simplifyT(vector<Line*> lines, Triangle& tri, int threadId
 
 void GridSimplifierM::simplifyTP(vector<Line*> lines, Polygon& poly, int threadId){
 	for (int i = 0; i<lines.size(); ++i){
-		for (int j = 1; j < lines[i]->points.size()/2; ++j){
+		if (lines[i]->id == 6)
+			int a = 0;
+		for (int j = 1; j < lines[i]->points.size() / 2; ++j){
 			poly.p[1] = lines[i]->points[j * 2 - 1];
 			poly.p[2] = lines[i]->points[j * 2];
 			poly.p[0] = lines[i]->points[poly.p[1]->leftInd];
