@@ -61,7 +61,6 @@ void GridSimplifierM::simplifyT(vector<Line*> lines, Triangle& tri, int threadId
 }
 
 void GridSimplifierM::simplifyTP(vector<Line*> lines, Polygon& poly, int threadId){
-	Triangle tri;
 	for (int i = 0; i<lines.size(); ++i){
 		for (int j = 1; j < lines[i]->points.size() / 2; ++j){
 			poly.p[1] = lines[i]->points[j * 2 - 1];
@@ -69,13 +68,10 @@ void GridSimplifierM::simplifyTP(vector<Line*> lines, Polygon& poly, int threadI
 			poly.p[0] = lines[i]->points[poly.p[1]->leftInd];
 			poly.p[3] = lines[i]->points[poly.p[2]->rightInd];
 			poly.getRange();
-			//removeS(poly, threadId);
-			if (!removeS(poly, threadId)){
-				if(!removeS(Triangle(poly.p[0], poly.p[1], poly.p[2]), threadId))
-					removeS(Triangle(poly.p[1], poly.p[2], poly.p[3]), threadId);
-			}
+			removeS(poly, threadId);
 		}
 		if (lines[i]->points.size() % 2 == 1){
+			Triangle tri;
 			tri.p[1] = lines[i]->points[lines[i]->points.size()-2];
 			tri.p[0] = lines[i]->points[tri.p[1]->leftInd];
 			tri.p[2] = lines[i]->points[tri.p[1]->rightInd];
