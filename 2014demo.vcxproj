@@ -94,8 +94,8 @@
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="FileIO.cpp" />
-    <ClCompile Include="GridSimplifier.cpp" />
     <ClCompile Include="GridSimplifierM.cpp" />
+    <ClCompile Include="GridSimplifier.cpp" />
     <ClCompile Include="GridTree.cpp" />
     <ClCompile Include="GridTreeM.cpp" />
     <ClCompile Include="NaiveSimplifier.cpp" />

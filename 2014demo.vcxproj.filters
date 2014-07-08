@@ -77,10 +77,10 @@
     <ClCompile Include="GridSimplifier.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="GridSimplifierM.cpp">
+    <ClCompile Include="GridTreeM.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="GridTreeM.cpp">
+    <ClCompile Include="GridSimplifierM.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
   </ItemGroup>
