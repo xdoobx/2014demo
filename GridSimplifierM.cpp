@@ -8,14 +8,14 @@
 GridSimplifierM::GridSimplifierM(char* lineFile, char* pointFile){
 	//clock_t begin, end;
 	//begin = clock();
-	map = readLinesM(lineFile,threadN);
+	map = readLinesM(lineFile, threadN);
 	points = readPoints(pointFile);
 	//end = clock();
 	//cout << "IO: " << end - begin << endl;
 
-	 //begin = clock();
+	//begin = clock();
 	gridIndex = new GridTreeM(map, points);
-	 //end = clock();
+	//end = clock();
 	//cout << "index: " << end - begin << endl;
 }
 
@@ -36,7 +36,7 @@ bool GridSimplifierM::removeS(Triangle &triangle, int threadId){
 
 bool GridSimplifierM::removeS(Polygon &poly, int threadId){
 	if (!gridIndex->hasPointInPoly(&poly)){
-		for (int i = 1; i < poly.size-1; ++i)
+		for (int i = 1; i < poly.size - 1; ++i)
 			poly.p[i]->kept = false; //set point as removed
 		poly.p[poly.size - 1]->leftInd = poly.p[0]->pointInd;
 		poly.p[0]->rightInd = poly.p[poly.size - 1]->pointInd;
