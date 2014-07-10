@@ -91,7 +91,7 @@ void GridSimplifierM::simplifyTP(vector<Line*> lines, Polygon& poly, int threadI
 			tri.p[2] = lines[i]->points[tri.p[1]->rightInd];
 			tri.sort();
 			removeS(tri, threadId);
-		}*/
+		}
 		for (int j = 1; j <= (lines[i]->points.size()-2) / 3; ++j){
 			poly.p[1] = lines[i]->points[j * 3 - 2];
 			poly.p[2] = lines[i]->points[j * 3 - 1];
@@ -131,6 +131,82 @@ void GridSimplifierM::simplifyTP(vector<Line*> lines, Polygon& poly, int threadI
 			tri.p[2] = lines[i]->points[tri.p[1]->rightInd];
 			tri.sort();
 			removeS(tri, threadId);
+		}*/
+		for (int j = 1; j <= (lines[i]->points.size() - 2) / 4; ++j){
+			poly.p[1] = lines[i]->points[j * 4 - 3];
+			poly.p[2] = lines[i]->points[j * 4 - 2];
+			poly.p[3] = lines[i]->points[j * 4 - 1];
+			poly.p[4] = lines[i]->points[j * 4];
+			poly.p[0] = lines[i]->points[poly.p[1]->leftInd];
+			poly.p[5] = lines[i]->points[poly.p[4]->rightInd];
+			poly.getRange();
+
+			if (!removeS(poly, threadId)){
+				if (!removeS(Triangle(poly.p[3], poly.p[4], poly.p[5]), threadId)){
+					if (!removeS(Triangle(poly.p[2], poly.p[3], poly.p[4]), threadId)){
+						if (!removeS(Triangle(poly.p[1], poly.p[2], poly.p[3]), threadId))
+							removeS(Triangle(poly.p[0], poly.p[1], poly.p[2]), threadId);
+						else
+							removeS(Triangle(poly.p[0], poly.p[1], poly.p[3]), threadId);
+					}
+					else{
+						if (!removeS(Triangle(poly.p[1], poly.p[2], poly.p[4]), threadId))
+							removeS(Triangle(poly.p[0], poly.p[1], poly.p[2]), threadId);
+						else
+							removeS(Triangle(poly.p[0], poly.p[1], poly.p[4]), threadId);
+					}
+				}
+				else{
+					if (!removeS(Triangle(poly.p[2], poly.p[3], poly.p[5]), threadId)){
+						if (!removeS(Triangle(poly.p[1], poly.p[2], poly.p[3]), threadId))
+							removeS(Triangle(poly.p[0], poly.p[1], poly.p[2]), threadId);
+						else
+							removeS(Triangle(poly.p[0], poly.p[1], poly.p[3]), threadId);
+					}
+					else{
+						if (!removeS(Triangle(poly.p[1], poly.p[2], poly.p[5]), threadId))
+							removeS(Triangle(poly.p[0], poly.p[1], poly.p[2]), threadId);
+						else
+							removeS(Triangle(poly.p[0], poly.p[1], poly.p[5]), threadId);
+					}
+				}
+			}
+		}
+		if ((lines[i]->points.size() - 2) % 4 == 1){
+			tri.p[1] = lines[i]->points[lines[i]->points.size() - 2];
+			tri.p[0] = lines[i]->points[tri.p[1]->leftInd];
+			tri.p[2] = lines[i]->points[tri.p[1]->rightInd];
+			tri.sort();
+			removeS(tri, threadId);
+		}
+		else if ((lines[i]->points.size() - 2) % 4 == 2){
+			tri.p[1] = lines[i]->points[lines[i]->points.size() - 3];
+			tri.p[0] = lines[i]->points[tri.p[1]->leftInd];
+			tri.p[2] = lines[i]->points[tri.p[1]->rightInd];
+			tri.sort();
+			removeS(tri, threadId);
+			tri.p[1] = lines[i]->points[lines[i]->points.size() - 2];
+			tri.p[0] = lines[i]->points[tri.p[1]->leftInd];
+			tri.p[2] = lines[i]->points[tri.p[1]->rightInd];
+			tri.sort();
+			removeS(tri, threadId);
+		}
+		else if ((lines[i]->points.size() - 2) % 4 == 3){
+			tri.p[1] = lines[i]->points[lines[i]->points.size() - 4];
+			tri.p[0] = lines[i]->points[tri.p[1]->leftInd];
+			tri.p[2] = lines[i]->points[tri.p[1]->rightInd];
+			tri.sort();
+			removeS(tri, threadId);
+			tri.p[1] = lines[i]->points[lines[i]->points.size() - 3];
+			tri.p[0] = lines[i]->points[tri.p[1]->leftInd];
+			tri.p[2] = lines[i]->points[tri.p[1]->rightInd];
+			tri.sort();
+			removeS(tri, threadId);
+			tri.p[1] = lines[i]->points[lines[i]->points.size() - 2];
+			tri.p[0] = lines[i]->points[tri.p[1]->leftInd];
+			tri.p[2] = lines[i]->points[tri.p[1]->rightInd];
+			tri.sort();
+			removeS(tri, threadId);
 		}
 	}
 }
@@ -154,11 +230,15 @@ void GridSimplifierM::simplifyMT(int limit){
 }
 
 void GridSimplifierM::simplifyMTP(int limit){
-	Polygon poly1(5, new Point*[5]);
+	Polygon poly1(6, new Point*[6]);
+	Polygon poly2(6, new Point*[6]);
+	Polygon poly3(6, new Point*[6]);
+	Polygon poly4(6, new Point*[6]);
+	/*Polygon poly1(5, new Point*[5]);
 	Polygon poly2(5, new Point*[5]);
 	Polygon poly3(5, new Point*[5]);
 	Polygon poly4(5, new Point*[5]);
-	/*Polygon poly1(4, new Point*[4]);
+	Polygon poly1(4, new Point*[4]);
 	Polygon poly2(4, new Point*[4]);
 	Polygon poly3(4, new Point*[4]);
 	Polygon poly4(4, new Point*[4]);*/
