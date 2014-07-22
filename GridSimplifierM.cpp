@@ -50,7 +50,7 @@ bool GridSimplifierM::removeS(Polygon &poly, int threadId){
 void GridSimplifierM::simplifyT(vector<Line*> lines, Triangle& tri, int threadId){
 	for (int i = 0; i<lines.size(); ++i){
 		if (lines[i]->points[0] != lines[i]->points[lines[i]->points.size() - 1]){
-			for (int j = 1; j < lines[i]->points.size() - 1; ++j){
+			for (int j = 1; j < lines[i]->points.size() - 2; ++j){
 				tri.p[1] = lines[i]->points[j];
 				tri.p[0] = lines[tri.p[1]->lineInd]->points[tri.p[1]->leftInd];
 				tri.p[2] = lines[tri.p[1]->lineInd]->points[tri.p[1]->rightInd];
@@ -296,6 +296,3 @@ void GridSimplifierM::wirteFile(string writeFile) {
 //		orig_size = gridIndex->size;
 //	}
 //}
-
-
-
